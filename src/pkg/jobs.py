@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 from pkg import helpers
 
 def mkdirs(settings):
@@ -12,7 +13,7 @@ def mkdirs(settings):
     helpers.mkdir(settings['sourcedir'])
     helpers.mkdir(settings['sourcedir'] + '/keyring')
     helpers.mkdir(settings['sourcedir'] + '/indices')
-    helpers.mkdir(settings['sourcedir'] + '/ubuntu=meta')
+    helpers.mkdir(settings['sourcedir'] + '/ubuntu-meta')
 
 def keyring(settings):
     response = os.system('gpg --list-keys | grep "'+ settings['gpgkeyname'] + '" >/dev/null')
@@ -136,3 +137,32 @@ Contents {
             os.system('cd ' + settings['sourcedir'] + '/indices && wget http://archive.ubuntu.com/ubuntu/indices/' + i)
     os.system('cat ' + settings['sourcedir'] + '/indices/override.breezy.extra.main | egrep -v \' Task \' > ' + settings['sourcedir'] + '/indices/override.breezy.extra2.main')
     os.system('cat ' + settings['cdsourcedir'] + '/dists/breezy/main/binary-i386/Packages | perl -e \'while (<>) { chomp; if(/^Package\:\s*(.+)$/) { $pkg=$1; } elsif(/^Task\:\s(.+)$/) { print "$pkg\tTask\t$1\n"; } }\' >> ' + settings['sourcedir'] + '/indices/override.breezy.extra2.main')
+
+def resync(settings):
+    print('Re-syncing old data . . .')
+    os.system('''
+    cd ''' + settings['basedir'] + '''/FinalCD
+    rsync -atz --delete ''' + settings['cdsourcedir'] + '/ ' + settings['basedir'] + '''/FinalCD/
+    ''')
+
+def remove_packages(settings):
+    if not os.path.isfile(settings['packagelist']):
+        print('No PackageList found. Assuming that you do not require any packages to be removed')
+    else:
+        os.system('cat ' + settings['packagelist'] + ' | grep "^ii" | awk \'{print $2 "_" $3}\' > ' + settings['sourcedir'] + '/temppackages')
+        print('Removing files that are no longer required . . .')
+        filenames = os.popen('cd ' + settings['basedir'] + '/FinalCD && find pool/main -type f -name "*.deb" -print').read().split('\n')
+        filenames = filenames[:len(filenames) - 1]
+        to_remove = []
+        for i in filenames:
+            match = re.findall(r'(?<=\/)[a-zA-Z0-9\.\-\_\+]+(?=_.+\.deb)', i)[0]
+            # print(match)
+            with open(settings['sourcedir'] + '/temppackages') as f:
+                for line in f.readlines():
+                    if line.find(match) > -1:
+                        to_remove.append(line)
+        if len(to_remove) > 0:
+            for remove in to_remove:
+                print(remove)
+        else:
+            print('Nothing to remove')

@@ -43,5 +43,7 @@ def main(argv):
         jobs.keyring(settings)
         jobs.mountiso(settings)
         jobs.ftparchive(settings)
+        jobs.resync(settings)
+        jobs.remove_packages(settings)
 
 main(sys.argv)
