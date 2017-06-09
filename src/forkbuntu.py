@@ -45,5 +45,6 @@ def main(argv):
         jobs.ftparchive(settings)
         jobs.resync(settings)
         jobs.remove_packages(settings)
+        jobs.keyfile(settings)
 
 main(sys.argv)

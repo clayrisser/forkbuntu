@@ -156,13 +156,26 @@ def remove_packages(settings):
         to_remove = []
         for i in filenames:
             match = re.findall(r'(?<=\/)[a-zA-Z0-9\.\-\_\+]+(?=_.+\.deb)', i)[0]
-            # print(match)
             with open(settings['sourcedir'] + '/temppackages') as f:
                 for line in f.readlines():
                     if line.find(match) > -1:
                         to_remove.append(line)
         if len(to_remove) > 0:
             for remove in to_remove:
-                print(remove)
+                pass
         else:
             print('Nothing to remove')
+
+def keyfile(settings):
+    print('Generating keyfile . . .')
+    keyring = os.popen('find * -maxdepth 1 -name "ubuntu-keyring*" -type d -print').read()
+    if len(keyring) <= 0:
+        print(2)
+        keyring = os.popen('''
+        # cd ''' + settings['sourcedir'] + '''/keyring
+        apt-get source ubuntu-keyring &> /dev/null
+        # find * -maxdepth 1 -name "ubuntu-keyring*" -type d -print
+        ''').read()
+        if len(keyring) <= 0:
+            print(3)
+            sys.exit('Cannot grab keyring source')
