@@ -4,6 +4,10 @@ CWD := $(shell pwd)
 .PHONY: all
 all: clean
 
+.PHONY: start
+start:
+	@env/bin/python ./src
+
 env:
 	@virtualenv env
 	@env/bin/pip install -r ./requirements.txt

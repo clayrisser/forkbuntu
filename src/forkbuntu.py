@@ -15,7 +15,7 @@ if not os.geteuid() == 0:
 settings = {
     'basedir': os.getcwd() + '/MyBuildInstall',
     'seedfile': 'mybuild.seed',
-    'cdimage': 'ubuntu-5.10-install-i386.iso',
+    'cdimage': 'ubuntu-16.04.3-server-amd64.iso',
     'gpgkeyname': 'My Organisation Installation Key',
     'gpgkeycomment': 'Package Signing',
     'gpgkeyemail': 'myorg@myorganisation.com',

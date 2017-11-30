@@ -1,2 +1,5 @@
 MyBuildInstall
 **/*.pyc
+**/**/*.pyc
+env
+ubuntu-keyring*
