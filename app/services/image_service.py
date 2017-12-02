@@ -22,6 +22,15 @@ def unmountiso(cdsourcedir):
     else:
         print('Nothing to unmount')
 
+def unsquashfs(basedir):
+    print('Unsquashing . . .')
+    if not os.path.exists(basedir + '/filesystem'):
+        os.mkdir(basedir + '/filesystem')
+    os.system('unsquashfs -f -d ' + basedir + '/filesystem ' + basedir + '/FinalCD/install/filesystem.squashfs')
+
+def squashfs():
+    pass
+
 def clone_iso_contents(basedir, cdsourcedir):
     print('Re-syncing old data . . .')
     os.system('rsync -a --exclude ubuntu ' + cdsourcedir + '/ ' + basedir + '/FinalCD/')

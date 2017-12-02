@@ -1,5 +1,5 @@
 from cement.core.controller import CementBaseController, expose
-from app.services import setup_service, keyring_service, image_service
+from app.services import setup_service, keyring_service, image_service, filesystem_service
 from os import path
 import os
 
@@ -63,5 +63,7 @@ class BuildController(CementBaseController):
         keyring_service.create(pargs.key_name, pargs.key_comment, pargs.key_passphrase, pargs.email, basedir)
         image_service.mountiso(cdsourcedir, basedir, image)
         image_service.clone_iso_contents(basedir, cdsourcedir)
+        image_service.unsquashfs(basedir)
         image_service.unmountiso(cdsourcedir)
         keyring_service.keyfile(pargs.key_name, pargs.key_comment, pargs.key_passphrase, pargs.email, basedir)
+        filesystem_service.update_filesystem_size(basedir)

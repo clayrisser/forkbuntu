@@ -1,6 +1,7 @@
 import os
 import re
 import gnupg
+from shutil import copyfile
 from os import path
 from pydash import _
 from app.exceptions.base_exceptions import DefaultException
@@ -27,9 +28,8 @@ def create(name, comment, passphrase, email, basedir=None):
             passphrase=passphrase
         )
         key = gpg.gen_key(input_data)
-        print(key)
 
-def keyfile(name, comment, passphrase, email, basedir=None):
+def keyfile(name, comment, passphrase, email, basedir):
     print('Generating keyfile . . .')
     keyring = os.popen('find * -maxdepth 1 -name "ubuntu-keyring*" -type d -print').read().split('\n')[0]
     if len(keyring) <= 0:
@@ -52,10 +52,14 @@ def keyfile(name, comment, passphrase, email, basedir=None):
         f.close()
     os.chdir('../')
     os.system('''
-    dpkg-buildpackage -rfakeroot -m"''' + keyid + '''" -k"''' + keyid + '''"
+    dpkg-buildpackage -rfakeroot -m"''' + keyid + '''" -k"''' + keyid + '''" -pgpg
     # # cd ..  # you are now on the directory where you started, in the example, /opt/build
     # # cp ubuntu-keyring*deb /opt/cd-image/pool/main/u/ubuntu-keyring
     ''')
+    keyring_file = path.abspath(path.join(os.getcwd(), 'keyrings', 'ubuntu-archive-keyring.gpg'))
+    copyfile(keyring_file, basedir + '/filesystem/etc/apt/trusted.gpg')
+    copyfile(keyring_file, basedir + '/filesystem/usr/share/keyrings/ubuntu-archive-keyring.gpg')
+    copyfile(keyring_file, basedir + '/filesystem/var/lib/apt/keyrings/ubuntu-archive-keyring.gpg')
 
 def get_key_id(name, email):
     result = os.popen('gpg --list-keys ' + name).read()

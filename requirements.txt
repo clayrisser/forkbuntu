@@ -3,6 +3,8 @@ cement==2.10.2
 gnupg==2.3.1
 packaging==16.8
 psutil==5.4.1
+pychroot==0.9.18
 pydash==4.3.0
 pyparsing==2.2.0
 six==1.10.0
+snakeoil==0.7.5
