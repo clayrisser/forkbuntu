@@ -9,6 +9,7 @@ from pydash import _
 gpg = gnupg.GPG(homedir='/root/.gnupg')
 
 def create(name, comment, passphrase, email, basedir=None):
+    print('Creating gpg key . . .')
     keys = gpg.list_keys()
     key_exists = False
     for key in keys:
@@ -38,19 +39,20 @@ def keyfile(name, comment, passphrase, email, basedir=None):
             raise DefaultException('Cannot grab keyring source')
     keyid = get_key_id(name, email)
     os.chdir(keyring + '/keyrings')
-    with open('ubuntu-archive-keyring.gpg', 'r') as f:
+    if not path.exists('ubuntu-archive-keyring-original.gpg'):
+        os.rename('ubuntu-archive-keyring.gpg', 'ubuntu-archive-keyring-original.gpg')
+    with open('ubuntu-archive-keyring-original.gpg', 'r') as f:
         gpg.import_keys(f.read())
     keyids = ['FBB75451', '437D05B5', 'C0B21F32', 'EFE21092', keyid]
     keydata_public = gpg.export_keys(keyids)
     keydata_private = gpg.export_keys(keyids, True)
-    # with open('ubuntu-archive-keyring.gpg', 'w') as f:
-        # f.write(keydata_public)
-        # f.write(keydata_private)
-        # f.close()
+    with open('ubuntu-archive-keyring.gpg', 'w') as f:
+        f.write(keydata_public)
+        f.write(keydata_private)
+        f.close()
     os.chdir('../')
-    # os.system('gpg --list-secret-keys')
     os.system('''
-    dpkg-buildpackage -rfakeroot -m"''' + keyid + '''" -k"''' + keyid + '''" -p"gpg2"
+    dpkg-buildpackage -rfakeroot -m"''' + keyid + '''" -k"''' + keyid + '''"
     # # cd ..  # you are now on the directory where you started, in the example, /opt/build
     # # cp ubuntu-keyring*deb /opt/cd-image/pool/main/u/ubuntu-keyring
     ''')
