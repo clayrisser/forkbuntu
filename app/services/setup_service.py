@@ -5,7 +5,7 @@ from os import path
 
 def validate_deps():
     print('validating deps . . .')
-    if not is_installed('gpg'):
+    if not is_installed('gpg2'):
         raise DefaultException('gpg required to generate signing keys')
 
 def validate_image(image_name):
