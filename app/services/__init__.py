@@ -2,3 +2,4 @@ import setup_service
 import keyring_service
 import image_service
 import filesystem_service
+import build_service

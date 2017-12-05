@@ -7,7 +7,7 @@ from pydash import _
 from app.exceptions.base_exceptions import DefaultException
 from pydash import _
 
-gpg = gnupg.GPG(homedir='/root/.gnupg')
+gpg = gnupg.GPG(homedir=path.join(path.expanduser('~'), '.gnupg'))
 
 def create(name, comment, passphrase, email, basedir=None):
     print('Creating gpg key . . .')

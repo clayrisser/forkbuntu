@@ -1,6 +1,16 @@
+from __future__ import print_function
+from glob import glob
 from cement.core.controller import CementBaseController, expose
-from app.services import setup_service, keyring_service, image_service, filesystem_service
+from builtins import input
+from app.services import (
+    setup_service,
+    keyring_service,
+    image_service,
+    git_service,
+    filesystem_service
+)
 from os import path
+from app.services.helper_service import prompt
 import os
 
 class BuildController(CementBaseController):
@@ -14,56 +24,63 @@ class BuildController(CementBaseController):
                 'action': 'store',
                 'dest': 'image',
                 'help': 'Image location',
-                'required': True
+                'required': False
             }),
             (['-e', '--email'], {
                 'action': 'store',
                 'dest': 'email',
                 'help': 'Email',
-                'required': True
+                'required': False
             }),
-            (['--key-name'], {
+            (['--name'], {
                 'action': 'store',
-                'dest': 'key_name',
-                'help': 'Key name',
-                'required': True
+                'dest': 'name',
+                'help': 'Name',
+                'required': False
             }),
-            (['--key-comment'], {
-                'action': 'store',
-                'dest': 'key_comment',
-                'help': 'Key comment',
-                'required': True
-            }),
-            (['--key-passphrase'], {
+            (['-p', '--key-passphrase'], {
                 'action': 'store',
                 'dest': 'key_passphrase',
                 'help': 'Key passphrase',
-                'required': True
+                'required': False
             }),
-            (['-b', '--basedir'], {
+            (['-d', '--workdir'], {
                 'action': 'store',
                 'dest': 'basedir',
                 'help': 'Base directory',
-                'required': True
+                'required': False
             })
         ]
 
     @expose(hide=True)
     def default(self):
         pargs = self.app.pargs
-        image = path.abspath(path.join(os.getcwd(), pargs.image))
-        basedir = path.abspath(path.join(os.getcwd(), pargs.basedir))
-        cdsourcedir = path.abspath(path.join(basedir, 'cdsource'));
-        extrasdir = path.abspath(path.join(basedir, 'MyBuild'))
-        sourcedir = path.abspath(path.join(basedir, 'source'));
-        setup_service.validate_deps()
-        setup_service.validate_image(image)
-        setup_service.basedir(basedir, cdsourcedir, extrasdir, sourcedir)
-        os.chdir(basedir)
-        keyring_service.create(pargs.key_name, pargs.key_comment, pargs.key_passphrase, pargs.email, basedir)
-        image_service.mountiso(cdsourcedir, basedir, image)
-        image_service.clone_iso_contents(basedir, cdsourcedir)
-        image_service.unsquashfs(basedir)
-        image_service.unmountiso(cdsourcedir)
-        keyring_service.keyfile(pargs.key_name, pargs.key_comment, pargs.key_passphrase, pargs.email, basedir)
-        filesystem_service.update_filesystem_size(basedir)
+        image = pargs.image
+        if not image:
+            images = glob(path.join(path.expanduser('~'), 'Downloads', '*.iso'))
+            default_image = None
+            if len(images) > 0:
+                default_image = images[0]
+            image = prompt('image', default_image)
+        email = pargs.email
+        if not email:
+            default_email = git_service.get_email()
+        print('email', email)
+
+
+        # image = path.abspath(path.join(os.getcwd(), pargs.image))
+        # basedir = path.abspath(path.join(os.getcwd(), pargs.basedir))
+        # cdsourcedir = path.abspath(path.join(basedir, 'cdsource'));
+        # extrasdir = path.abspath(path.join(basedir, 'MyBuild'))
+        # sourcedir = path.abspath(path.join(basedir, 'source'));
+        # setup_service.validate_deps()
+        # setup_service.validate_image(image)
+        # setup_service.basedir(basedir, cdsourcedir, extrasdir, sourcedir)
+        # os.chdir(basedir)
+        # keyring_service.create(pargs.key_name, pargs.key_comment, pargs.key_passphrase, pargs.email, basedir)
+        # image_service.mountiso(cdsourcedir, basedir, image)
+        # image_service.clone_iso_contents(basedir, cdsourcedir)
+        # image_service.unsquashfs(basedir)
+        # image_service.unmountiso(cdsourcedir)
+        # keyring_service.keyfile(pargs.key_name, pargs.key_comment, pargs.key_passphrase, pargs.email, basedir)
+        # filesystem_service.update_filesystem_size(basedir)
