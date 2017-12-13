@@ -7,7 +7,6 @@ packaging==16.8
 psutil==5.4.1
 pychroot==0.9.18
 pydash==4.3.0
-pygit==0.1
 pyparsing==2.2.0
 six==1.10.0
 snakeoil==0.7.5

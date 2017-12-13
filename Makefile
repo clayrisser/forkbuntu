@@ -1,29 +1,28 @@
-SHELL := /bin/bash
 CWD := $(shell pwd)
 
 .PHONY: all
 all: clean
 
 .PHONY: start
-start:
-	@env/bin/python ./src
+start: env
+	@env/bin/python ./app build
 
 env:
 	@virtualenv env
 	@env/bin/pip install -r ./requirements.txt
-	@echo created virtualenv
+	@echo ::: ENV :::
 
 .PHONY: build
 build:
 	@sudo python ./src/forkbuntu.py
-	@echo built
+	@echo ::: BUILD :::
 
 .PHONY: freeze
 freeze:
 	@env/bin/pip freeze > ./requirements.txt
-	@echo froze requirements
+	@echo ::: FREEZE :::
 
 .PHONY: clean
 clean:
-	-@sudo rm -rf ./env ./MyBuildInstall
-	@echo cleaned
+	-@rm -rf ./env ./tmp ./**/*.pyc ./**/**/*.pyc &>/dev/null || true
+	@echo ::: CLEAN :::

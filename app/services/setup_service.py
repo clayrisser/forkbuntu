@@ -3,28 +3,16 @@ import os
 from app.exceptions.base_exceptions import DefaultException
 from os import path
 
-def validate_deps():
-    print('validating deps . . .')
-    if not is_installed('gpg2'):
+def validate_deps(app):
+    app.log.info('Validating build dependencies . . .')
+    if is_installed('gpg2'):
+        app.log.info('found gpg2')
+    else:
         raise DefaultException('gpg required to generate signing keys')
 
-def validate_image(image_name):
-    print('validating image . . .')
-    image_path = path.abspath(path.join(image_name))
-    if not os.path.isfile(image_name):
-        raise DefaultException(image_path + ' is not a valid ubuntu image')
-
-def basedir(basedir, cdsourcedir, extrasdir, sourcedir):
-    mkdir(basedir)
-    mkdir(basedir + '/FinalCD')
-    mkdir(cdsourcedir)
-    mkdir(extrasdir)
-    mkdir(extrasdir + '/preseed')
-    mkdir(extrasdir + '/pool/extras')
-    mkdir(sourcedir)
-    mkdir(sourcedir + '/keyring')
-    mkdir(sourcedir + '/indices')
-    mkdir(sourcedir + '/ubuntu-meta')
+def workdir(workdir):
+    if not path.exists(workdir):
+        os.mkdir(workdir)
 
 def mkdir(path):
     try:

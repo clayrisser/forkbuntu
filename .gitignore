@@ -1,5 +1,5 @@
-MyBuildInstall
 **/*.pyc
 **/**/*.pyc
-env
+env/
 ubuntu-keyring*
+tmp/

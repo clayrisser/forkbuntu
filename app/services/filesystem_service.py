@@ -1,7 +1,9 @@
 import os
 
-def update_filesystem_size(basedir):
-    print('Updating filesystem size . . .')
-    os.chdir(basedir + '/filesystem')
-    os.system('du -sx --block-size=1 ./ | cut -f1 > ' + basedir + '/FinalCD/install/filesystem.size')
-    os.chdir(basedir)
+def update_filesystem_size(workdir, app):
+    contentspath = workdir + '/contents'
+    filesystempath = workdir + '/filesystem'
+    os.chdir(filesystempath)
+    os.popen('du -sx --block-size=1 ./ | cut -f1 | sudo tee ' + contentspath + '/install/filesystem.size').read()
+    os.chdir(workdir)
+    app.log.info('Filesystem size updated')

@@ -9,8 +9,8 @@ from pydash import _
 
 gpg = gnupg.GPG(homedir=path.join(path.expanduser('~'), '.gnupg'))
 
-def create(name, comment, passphrase, email, basedir=None):
-    print('Creating gpg key . . .')
+def create(name, comment, passphrase, email, app):
+    app.log.info('Creating gpg key . . .')
     keys = gpg.list_keys()
     key_exists = False
     for key in keys:
@@ -29,16 +29,15 @@ def create(name, comment, passphrase, email, basedir=None):
         )
         key = gpg.gen_key(input_data)
 
-def keyfile(name, comment, passphrase, email, basedir):
-    print('Generating keyfile . . .')
+def generate_keyfile(name, comment, passphrase, email, workdir, app):
     keyring = os.popen('find * -maxdepth 1 -name "ubuntu-keyring*" -type d -print').read().split('\n')[0]
     if len(keyring) <= 0:
-        os.system('apt-get source ubuntu-keyring')
+        os.popen('apt-get source ubuntu-keyring').read()
         keyring = os.popen('find * -maxdepth 1 -name "ubuntu-keyring*" -type d -print').read().split('\n')[0]
         if len(keyring) <= 0:
             raise DefaultException('Cannot grab keyring source')
     keyid = get_key_id(name, email)
-    os.chdir(keyring + '/keyrings')
+    os.chdir(path.join(keyring, 'keyrings'))
     if not path.exists('ubuntu-archive-keyring-original.gpg'):
         os.rename('ubuntu-archive-keyring.gpg', 'ubuntu-archive-keyring-original.gpg')
     with open('ubuntu-archive-keyring-original.gpg', 'r') as f:
@@ -50,16 +49,13 @@ def keyfile(name, comment, passphrase, email, basedir):
         f.write(keydata_public)
         f.write(keydata_private)
         f.close()
-    os.chdir('../')
-    os.system('''
-    dpkg-buildpackage -rfakeroot -m"''' + keyid + '''" -k"''' + keyid + '''" -pgpg
-    # # cd ..  # you are now on the directory where you started, in the example, /opt/build
-    # # cp ubuntu-keyring*deb /opt/cd-image/pool/main/u/ubuntu-keyring
-    ''')
-    keyring_file = path.abspath(path.join(os.getcwd(), 'keyrings', 'ubuntu-archive-keyring.gpg'))
-    copyfile(keyring_file, basedir + '/filesystem/etc/apt/trusted.gpg')
-    copyfile(keyring_file, basedir + '/filesystem/usr/share/keyrings/ubuntu-archive-keyring.gpg')
-    copyfile(keyring_file, basedir + '/filesystem/var/lib/apt/keyrings/ubuntu-archive-keyring.gpg')
+    os.chdir(path.abspath('..'))
+    os.system('dpkg-buildpackage -rfakeroot -m"' + keyid + '" -k"' + keyid + '"')
+    keyfile = path.join(os.getcwd(), 'keyrings', 'ubuntu-archive-keyring.gpg')
+    copyfile(keyfile, path.join(workdir, 'filesystem/etc/apt/trusted.gpg'))
+    copyfile(keyfile, path.join(workdir, 'filesystem/usr/share/keyrings/ubuntu-archive-keyring.gpg'))
+    copyfile(keyfile, path.join(workdir, 'filesystem/var/lib/apt/keyrings/ubuntu-archive-keyring.gpg'))
+    app.log.info('Generated keyfile')
 
 def get_key_id(name, email):
     result = os.popen('gpg --list-keys ' + name).read()
