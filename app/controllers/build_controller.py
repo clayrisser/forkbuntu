@@ -1,21 +1,12 @@
 from __future__ import print_function
 from glob import glob
-from cement.core.controller import CementBaseController, expose
+from cement.core.controller import expose
 from builtins import input
-from app.services import (
-    setup_service,
-    extras_service,
-    gpg_service,
-    image_service,
-    iso_service,
-    git_service,
-    filesystem_service
-)
 from os import path
-from app.services.helper_service import prompt
+from cfoundation import Controller
 import os
 
-class BuildController(CementBaseController):
+class BuildController(Controller):
     class Meta:
         label = 'build'
         description = 'Build Ubuntu'
@@ -68,6 +59,8 @@ class BuildController(CementBaseController):
 
     @expose(hide=True)
     def default(self):
+        s = self.app.services
+        prompt = s.helper_service.prompt
         pargs = self.app.pargs
         image = pargs.image
         if not image:
@@ -79,11 +72,11 @@ class BuildController(CementBaseController):
         image = path.abspath(image)
         email = pargs.email
         if not email:
-            default_email = git_service.get_email()
+            default_email = s.git_service.get_email()
             email = prompt('email', default_email)
         name = pargs.name
         if not name:
-            default_name = git_service.get_name()
+            default_name = s.git_service.get_name()
             name = prompt('name', default_name)
         passphrase = pargs.passphrase
         if not passphrase:
@@ -106,29 +99,27 @@ class BuildController(CementBaseController):
         self.app.log.info('workdir: ' + workdir)
         self.app.log.info('extras: ' + extras)
         self.app.log.info('dist: ' + dist)
-        setup_service.validate_deps(app=self.app)
-        setup_service.workdir(workdir)
+        s.setup_service.validate_deps()
+        s.setup_service.workdir(workdir)
         os.chdir(workdir)
-        gpg_service.create(
+        s.gpg_service.create(
+            name=name,
+            comment=name,
+            passphrase=passphrase,
+            email=email
+        )
+        s.image_service.mount_iso(image, workdir)
+        s.image_service.clone_image_contents(workdir)
+        s.image_service.unsquashfs(workdir)
+        s.image_service.unmount_iso(workdir)
+        s.gpg_service.generate_keyfile(
             name=name,
             comment=name,
             passphrase=passphrase,
             email=email,
-            app=self.app
+            workdir=workdir
         )
-        image_service.mountiso(image, workdir, app=self.app)
-        image_service.clone_image_contents(workdir, app=self.app)
-        image_service.unsquashfs(workdir, app=self.app)
-        image_service.unmountiso(workdir, app=self.app)
-        gpg_service.generate_keyfile(
-            name=name,
-            comment=name,
-            passphrase=passphrase,
-            email=email,
-            workdir=workdir,
-            app=self.app
-        )
-        filesystem_service.update_filesystem_size(workdir, app=self.app)
-        extras_service.copy(extras, workdir, app=self.app)
-        extras_service.build_repository(workdir, name, dist, app=self.app)
-        iso_service.burn(workdir, app=self.app)
+        s.filesystem_service.update_filesystem_size(workdir)
+        s.extras_service.copy(extras, workdir)
+        s.extras_service.build_repository(workdir, name, dist)
+        s.iso_service.burn(workdir)

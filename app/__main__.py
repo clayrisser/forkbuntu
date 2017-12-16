@@ -2,6 +2,7 @@ from cement.core.foundation import CementApp
 from cement.utils.misc import init_defaults
 from config import NAME, BANNER
 from pydash import _
+from cfoundation import register
 from controllers import (
     BuildController,
     BaseController
@@ -31,6 +32,7 @@ def main():
     app = create_app()
     print(BANNER)
     try:
+        register(app)
         app.run()
     except BaseException as err:
         if not hasattr(err, 'known') or not err.known:
