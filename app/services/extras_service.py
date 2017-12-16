@@ -9,7 +9,7 @@ def copy(extras, workdir, app):
     copy_tree(extras, path.join(contentspath, 'pool', 'extras'))
     app.log.info('Copied extras')
 
-def build_repository(workdir, dist, app):
+def build_repository(workdir, name, dist, app):
     indicespath = path.join(workdir, 'indices')
     ftparchivepath = path.join(workdir, 'apt-ftparchive')
     contentspath = path.join(workdir, 'contents')
@@ -56,14 +56,12 @@ def build_repository(workdir, dist, app):
     os.system('''
     apt-ftparchive packages pool/extras > dists/stable/extras/binary-amd64/Packages
     gzip -c dists/stable/extras/binary-amd64/Packages | tee dists/stable/extras/binary-amd64/Packages.gz > /dev/null
-    pushd ''' + contentspath + '''
-    apt-ftparchive -c ''' + ftparchivepath + '''/release.conf generate /opt/apt-ftparchive/apt-ftparchive-deb.conf
-    apt-ftparchive -c ''' + ftparchivepath + '''/release.conf generate /opt/apt-ftparchive/apt-ftparchive-udeb.conf
-    apt-ftparchive -c ''' + ftparchivepath + '''/release.conf generate /opt/apt-ftparchive/apt-ftparchive-extras.conf
-    apt-ftparchive -c ''' + ftparchivepath + '''/release.conf release $BUILD/dists/''' + dist + ''' > $BUILD/dists/''' + dist + '''/Release
-    gpg --default-key "YOURKEYID" --output ''' + contentspath + '''/dists/''' + dist + '''/Release.gpg -ba ''' + contentspath + '''/dists/''' + dist + '''/Release
-    find . -type f -print0 | xargs -0 md5sum > md5sum.txt
-    popd
+    apt-ftparchive -c ''' + ftparchivepath + '''/release.conf generate ''' + ftparchivepath + '''/apt-ftparchive-deb.conf
+    apt-ftparchive -c ''' + ftparchivepath + '''/release.conf generate ''' + ftparchivepath + '''/apt-ftparchive-udeb.conf
+    apt-ftparchive -c ''' + ftparchivepath + '''/release.conf generate ''' + ftparchivepath + '''/apt-ftparchive-extras.conf
+    apt-ftparchive -c ''' + ftparchivepath + '''/release.conf release ''' + contentspath + '''/dists/''' + dist + ''' > ''' + contentspath + '''/dists/''' + dist + '''/Release
+    gpg --default-key "''' + name + '''" --output ''' + contentspath + '''/dists/''' + dist + '''/Release.gpg -ba ''' + contentspath + '''/dists/''' + dist + '''/Release
+    find \. -type f -print0 | xargs -0 md5sum > sudo tee md5sum.txt
     ''')
     os.chdir(workdir)
     app.log.info('Built repository')

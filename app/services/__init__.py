@@ -2,5 +2,5 @@ import setup_service
 import gpg_service
 import image_service
 import filesystem_service
-import build_service
 import extras_service
+import iso_service

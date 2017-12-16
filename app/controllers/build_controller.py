@@ -7,6 +7,7 @@ from app.services import (
     extras_service,
     gpg_service,
     image_service,
+    iso_service,
     git_service,
     filesystem_service
 )
@@ -129,4 +130,5 @@ class BuildController(CementBaseController):
         )
         filesystem_service.update_filesystem_size(workdir, app=self.app)
         extras_service.copy(extras, workdir, app=self.app)
-        extras_service.build_repository(workdir, dist, app=self.app)
+        extras_service.build_repository(workdir, name, dist, app=self.app)
+        iso_service.burn(workdir, app=self.app)
