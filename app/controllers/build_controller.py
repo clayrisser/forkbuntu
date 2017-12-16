@@ -4,6 +4,7 @@ from cement.core.controller import CementBaseController, expose
 from builtins import input
 from app.services import (
     setup_service,
+    extras_service,
     gpg_service,
     image_service,
     git_service,
@@ -49,6 +50,18 @@ class BuildController(CementBaseController):
                 'dest': 'workdir',
                 'help': 'Work directory',
                 'required': False
+            }),
+            (['--extras'], {
+                'action': 'store',
+                'dest': 'extras',
+                'help': 'Extras path',
+                'required': False
+            }),
+            (['-d', '--dist', '--distribution'], {
+                'action': 'store',
+                'dest': 'dist',
+                'help': 'Ubuntu distribution',
+                'required': False
             })
         ]
 
@@ -76,13 +89,22 @@ class BuildController(CementBaseController):
             passphrase = prompt('passphrase')
         workdir = pargs.workdir
         if not workdir:
-            default_workdir = path.abspath(path.join(os.getcwd(), 'tmp'))
+            default_workdir = path.join(os.getcwd(), 'tmp')
             workdir = prompt('workdir', default_workdir)
+        extras = pargs.extras
+        if not extras:
+            default_extras = path.join(os.getcwd(), 'extras')
+            extras = prompt('extras', default_extras)
+        dist = pargs.dist
+        if not dist:
+            dist = prompt('dist', 'xenial')
         self.app.log.info('image: ' + image)
         self.app.log.info('email: ' + email)
         self.app.log.info('name: ' + name)
         self.app.log.info('passphrase: ' + passphrase)
         self.app.log.info('workdir: ' + workdir)
+        self.app.log.info('extras: ' + extras)
+        self.app.log.info('dist: ' + dist)
         setup_service.validate_deps(app=self.app)
         setup_service.workdir(workdir)
         os.chdir(workdir)
@@ -106,3 +128,5 @@ class BuildController(CementBaseController):
             app=self.app
         )
         filesystem_service.update_filesystem_size(workdir, app=self.app)
+        extras_service.copy(extras, workdir, app=self.app)
+        extras_service.build_repository(workdir, dist, app=self.app)

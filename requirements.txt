@@ -3,6 +3,8 @@ cement==2.10.2
 colorlog==3.1.0
 future==0.16.0
 gnupg==2.3.1
+Jinja2==2.10
+MarkupSafe==1.0
 packaging==16.8
 psutil==5.4.1
 pychroot==0.9.18
