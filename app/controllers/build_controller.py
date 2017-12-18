@@ -1,10 +1,11 @@
 from __future__ import print_function
-from glob import glob
-from cement.core.controller import expose
-from builtins import input
-from os import path
-from cfoundation import Controller
+import getpass
 import os
+from builtins import input
+from cement.core.controller import expose
+from cfoundation import Controller
+from glob import glob
+from os import path
 
 class BuildController(Controller):
     class Meta:
@@ -34,13 +35,13 @@ class BuildController(Controller):
             (['-p', '--passphrase'], {
                 'action': 'store',
                 'dest': 'passphrase',
-                'help': 'Passphrase',
+                'help': 'GPG passphrase',
                 'required': False
             }),
             (['-w', '--workdir'], {
                 'action': 'store',
                 'dest': 'workdir',
-                'help': 'Work directory',
+                'help': 'Working directory',
                 'required': False
             }),
             (['--extras'], {
@@ -54,6 +55,12 @@ class BuildController(Controller):
                 'dest': 'dist',
                 'help': 'Ubuntu distribution',
                 'required': False
+            }),
+            (['-o', '--output'], {
+                'action': 'store',
+                'dest': 'output',
+                'help': 'Image output path',
+                'required': False
             })
         ]
 
@@ -62,12 +69,10 @@ class BuildController(Controller):
         s = self.app.services
         prompt = s.helper_service.prompt
         pargs = self.app.pargs
+        s.setup_service.validate_deps()
         image = pargs.image
         if not image:
-            images = glob(path.join(path.expanduser('~'), 'Downloads', '*.iso'))
-            default_image = None
-            if len(images) > 0:
-                default_image = images[0]
+            default_image = s.helper_service.find_image()
             image = prompt('image', default_image)
         image = path.abspath(image)
         email = pargs.email
@@ -80,7 +85,7 @@ class BuildController(Controller):
             name = prompt('name', default_name)
         passphrase = pargs.passphrase
         if not passphrase:
-            passphrase = prompt('passphrase')
+            passphrase = prompt('gpg passphrase', private=True)
         workdir = pargs.workdir
         if not workdir:
             default_workdir = path.join(os.getcwd(), 'tmp')
@@ -92,17 +97,14 @@ class BuildController(Controller):
         dist = pargs.dist
         if not dist:
             dist = prompt('dist', 'xenial')
-        self.app.log.info('image: ' + image)
-        self.app.log.info('email: ' + email)
-        self.app.log.info('name: ' + name)
-        self.app.log.info('passphrase: ' + passphrase)
-        self.app.log.info('workdir: ' + workdir)
-        self.app.log.info('extras: ' + extras)
-        self.app.log.info('dist: ' + dist)
-        s.setup_service.validate_deps()
-        s.setup_service.workdir(workdir)
+        output = pargs.output
+        if not output:
+            default_output = path.join(os.getcwd(), 'custom.iso')
+            output = path.abspath(path.join(os.getcwd(), prompt('output', default_output)))
+        print('output: ' + output)
+        s.setup_service.init_workdir(workdir)
         os.chdir(workdir)
-        s.gpg_service.create(
+        s.gpg_service.create_key(
             name=name,
             comment=name,
             passphrase=passphrase,
@@ -122,4 +124,4 @@ class BuildController(Controller):
         s.filesystem_service.update_filesystem_size(workdir)
         s.extras_service.copy(extras, workdir)
         s.extras_service.build_repository(workdir, name, dist)
-        s.iso_service.burn(workdir)
+        s.image_service.burn(workdir, output)

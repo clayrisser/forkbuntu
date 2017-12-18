@@ -1,5 +1,7 @@
 import sys
 import os
+import shutil
+import subprocess
 from app.exceptions.base_exceptions import DefaultException
 from os import path
 from cfoundation import Service
@@ -7,27 +9,29 @@ from cfoundation import Service
 class SetupService(Service):
 
     def validate_deps(self):
-        log = self.app.log
-        log.info('^ started setup validate deps')
-        if self.is_installed('gpg2'):
-            log.info('found gpg2')
-        else:
-            raise DefaultException('gpg required to generate signing keys')
-        log.info('$ finished setup validate deps')
+        s = self.app.services
+        s.task_service.started('validate_deps')
+        self.verify_installed('gpg2')
+        self.verify_installed('git')
+        self.verify_installed('mount')
+        s.task_service.finished('validate_deps')
 
-    def workdir(self, workdir):
+    def init_workdir(self, workdir):
+        s = self.app.services
+        s.task_service.started('init_workdir')
         if not path.exists(workdir):
-            os.mkdir(workdir)
+            os.makedirs(workdir)
+        s.task_service.finished('init_workdir')
 
-    def mkdir(self, path):
-        try:
-            os.makedirs(path)
-        except OSError:
-            pass
-
-    def is_installed(self, program):
-        res = os.system('which ' + program + ' > /dev/null')
-        if res == 0:
-            return True
+    def verify_installed(self, program):
+        log = self.app.log
+        pipe = subprocess.Popen(
+            ['which', program],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True
+        )
+        if pipe.stdout.readline():
+            log.info('Found \'' + program + '\'')
         else:
-            return False
+            raise DefaultException('Failed to find \'' + program + '\'')

@@ -1,20 +1,19 @@
+import gnupg
 import os
 import re
-import gnupg
-from shutil import copyfile
+from app.exceptions.base_exceptions import DefaultException
+from cfoundation import Service
 from os import path
 from pydash import _
-from app.exceptions.base_exceptions import DefaultException
-from pydash import _
-from cfoundation import Service
+from shutil import copyfile
 
 gpg = gnupg.GPG(homedir=path.join(path.expanduser('~'), '.gnupg'))
 
 class GpgService(Service):
 
-    def create(self, name, comment, passphrase, email):
-        log = self.app.log
-        log.info('^ started gpg create')
+    def create_key(self, name, comment, passphrase, email):
+        s = self.app.services
+        s.task_service.started('create_key')
         keys = gpg.list_keys()
         key_exists = False
         for key in keys:
@@ -32,11 +31,11 @@ class GpgService(Service):
                 passphrase=passphrase
             )
             key = gpg.gen_key(input_data)
-        log.info('$ finished gpg create')
+        s.task_service.finished('create_key')
 
     def generate_keyfile(self, name, comment, passphrase, email, workdir):
-        log = self.app.log
-        log.info('^ started gpg generate keyfile')
+        s = self.app.services
+        s.task_service.started('generate_keyfile')
         keyring = os.popen('find * -maxdepth 1 -name "ubuntu-keyring*" -type d -print').read().split('\n')[0]
         if len(keyring) <= 0:
             os.popen('apt-get source ubuntu-keyring').read()
@@ -62,7 +61,7 @@ class GpgService(Service):
         copyfile(keyfile, path.join(workdir, 'filesystem/etc/apt/trusted.gpg'))
         copyfile(keyfile, path.join(workdir, 'filesystem/usr/share/keyrings/ubuntu-archive-keyring.gpg'))
         copyfile(keyfile, path.join(workdir, 'filesystem/var/lib/apt/keyrings/ubuntu-archive-keyring.gpg'))
-        log.info('$ finished gpg generate keyfile')
+        s.task_service.finished('generate_keyfile')
 
     def get_key_id(self, name, email):
         result = os.popen('gpg --list-keys ' + name).read()

@@ -5,7 +5,7 @@ all: clean
 
 .PHONY: start
 start: env
-	@env/bin/python ./app build --debug
+	@sudo PYTHONPATH="." env/bin/python app build --debug
 
 env:
 	@virtualenv env
