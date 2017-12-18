@@ -12,11 +12,6 @@ env:
 	@env/bin/pip install -r ./requirements.txt
 	@echo ::: ENV :::
 
-.PHONY: build
-build:
-	@sudo python ./src/forkbuntu.py
-	@echo ::: BUILD :::
-
 .PHONY: freeze
 freeze:
 	@env/bin/pip freeze > ./requirements.txt
@@ -24,5 +19,10 @@ freeze:
 
 .PHONY: clean
 clean:
-	-@rm -rf ./env ./tmp ./**/*.pyc ./**/**/*.pyc &>/dev/null || true
+	-@sudo rm -rf ./tmp ./**/*.pyc ./**/**/*.pyc *.iso &>/dev/null || true
 	@echo ::: CLEAN :::
+
+.PHONY: purge
+purge: clean
+	-@rm -rf ./env ./extras &>/dev/null || true
+	@echo ::: PURGE :::

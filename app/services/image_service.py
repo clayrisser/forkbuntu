@@ -18,8 +18,8 @@ class ImageService(Service):
         else:
             mounts = os.popen('mount | grep ' + image_path).read()
             if len(mounts) > 0:
-                os.popen('umount ' + image_path).read()
-            os.popen('mount -o loop ' + image + ' ' + image_path).read()
+                os.system('umount ' + image_path)
+            os.system('mount -o loop ' + image + ' ' + image_path)
             if not os.path.isfile(image_path + '/md5sum.txt'):
                 raise DefaultException('Mounting \'' + image + '\' failed')
         s.task_service.finished('mount_iso')
@@ -30,7 +30,7 @@ class ImageService(Service):
         s.task_service.started('unmount_iso')
         image_path = workdir + '/image'
         if os.path.isfile(image_path + '/md5sum.txt'):
-            os.popen('umount ' + image_path)
+            os.system('umount ' + image_path)
             os.rmdir(image_path)
         else:
             log.info('Nothing to unmount')
@@ -43,7 +43,7 @@ class ImageService(Service):
         filesystem_path = workdir + '/filesystem'
         if not os.path.exists(filesystem_path):
             os.mkdir(filesystem_path)
-        os.popen('unsquashfs -f -d ' + filesystem_path + ' ' + image_path + '/install/filesystem.squashfs').read()
+        os.system('unsquashfs -f -d ' + filesystem_path + ' ' + image_path + '/install/filesystem.squashfs')
         s.task_service.finished('unsquashfs')
 
     def clone_image_contents(self, workdir):
@@ -51,7 +51,7 @@ class ImageService(Service):
         s.task_service.started('clone_image_contents')
         image_path = workdir + '/image'
         contentspath = workdir + '/contents'
-        os.popen('rsync -a --exclude ubuntu ' + image_path + '/ ' + contentspath).read()
+        os.system('rsync -a --exclude ubuntu ' + image_path + '/ ' + contentspath)
         s.task_service.finished('clone_image_contents')
 
     def burn(self, workdir, output_path):

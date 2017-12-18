@@ -14,6 +14,9 @@ class SetupService(Service):
         self.verify_installed('gpg2')
         self.verify_installed('git')
         self.verify_installed('mount')
+        self.verify_installed('umount')
+        self.verify_installed('unsquashfs')
+        self.verify_installed('xorriso')
         s.task_service.finished('validate_deps')
 
     def init_workdir(self, workdir):

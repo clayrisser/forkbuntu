@@ -4,3 +4,4 @@ env/
 ubuntu-keyring*
 tmp/
 extras/
+*.iso

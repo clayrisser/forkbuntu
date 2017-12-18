@@ -123,5 +123,10 @@ class BuildController(Controller):
         )
         s.filesystem_service.update_filesystem_size(workdir)
         s.extras_service.copy(extras, workdir)
-        s.extras_service.build_repository(workdir, name, dist)
+        s.extras_service.build_repository(
+            workdir,
+            name=name,
+            passphrase=passphrase,
+            dist=dist
+        )
         s.image_service.burn(workdir, output)

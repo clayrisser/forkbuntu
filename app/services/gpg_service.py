@@ -38,7 +38,7 @@ class GpgService(Service):
         s.task_service.started('generate_keyfile')
         keyring = os.popen('find * -maxdepth 1 -name "ubuntu-keyring*" -type d -print').read().split('\n')[0]
         if len(keyring) <= 0:
-            os.popen('apt-get source ubuntu-keyring').read()
+            os.system('apt-get source ubuntu-keyring')
             keyring = os.popen('find * -maxdepth 1 -name "ubuntu-keyring*" -type d -print').read().split('\n')[0]
             if len(keyring) <= 0:
                 raise DefaultException('Cannot grab keyring source')

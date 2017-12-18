@@ -9,6 +9,9 @@ class FilesystemService(Service):
         contents_path = workdir + '/contents'
         filesystem_path = workdir + '/filesystem'
         os.chdir(filesystem_path)
-        os.popen('du -sx --block-size=1 ./ | cut -f1 | tee ' + contents_path + '/install/filesystem.size').read()
+        filesystem_size = os.popen('du -sx --block-size=1 ./').read().split('\t')[0]
+        with open(contents_path + '/install/filesystem.size', 'w') as f:
+            f.write(filesystem_size)
+            f.close()
         os.chdir(workdir)
         s.task_service.finished('update_filesystem_size')
