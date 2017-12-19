@@ -1,7 +1,7 @@
 from app.exceptions.base_exceptions import DefaultException
 from os import path
 import os
-import getpass
+from getpass import getuser
 from cfoundation import Service
 
 class ImageService(Service):
@@ -18,8 +18,8 @@ class ImageService(Service):
         else:
             mounts = os.popen('mount | grep ' + image_path).read()
             if len(mounts) > 0:
-                os.system('umount ' + image_path)
-            os.system('mount -o loop ' + image + ' ' + image_path)
+                os.system('sudo umount ' + image_path)
+            os.system('sudo mount -o loop ' + image + ' ' + image_path)
             if not os.path.isfile(image_path + '/md5sum.txt'):
                 raise DefaultException('Mounting \'' + image + '\' failed')
         s.task_service.finished('mount_iso')
@@ -30,7 +30,7 @@ class ImageService(Service):
         s.task_service.started('unmount_iso')
         image_path = workdir + '/image'
         if os.path.isfile(image_path + '/md5sum.txt'):
-            os.system('umount ' + image_path)
+            os.system('sudo umount ' + image_path)
             os.rmdir(image_path)
         else:
             log.info('Nothing to unmount')
@@ -43,15 +43,17 @@ class ImageService(Service):
         filesystem_path = workdir + '/filesystem'
         if not os.path.exists(filesystem_path):
             os.mkdir(filesystem_path)
-        os.system('unsquashfs -f -d ' + filesystem_path + ' ' + image_path + '/install/filesystem.squashfs')
+        os.system('sudo unsquashfs -f -d ' + filesystem_path + ' ' + image_path + '/install/filesystem.squashfs')
+        os.popen('sudo chown -R ' + getuser() + ':' + getuser() + ' ' + filesystem_path)
         s.task_service.finished('unsquashfs')
 
     def clone_image_contents(self, workdir):
         s = self.app.services
         s.task_service.started('clone_image_contents')
-        image_path = workdir + '/image'
-        contentspath = workdir + '/contents'
-        os.system('rsync -a --exclude ubuntu ' + image_path + '/ ' + contentspath)
+        image_path = path.join(workdir, 'image')
+        contents_path = path.join(workdir, 'contents')
+        os.system('rsync -a --exclude ubuntu ' + image_path + '/ ' + contents_path)
+        os.popen('sudo chown -R ' + getuser() + ':' + getuser() + ' ' + contents_path)
         s.task_service.finished('clone_image_contents')
 
     def burn(self, workdir, output_path):

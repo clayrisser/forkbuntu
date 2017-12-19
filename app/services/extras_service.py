@@ -1,4 +1,5 @@
 import os
+from getpass import getuser
 from os import path
 from distutils.dir_util import copy_tree
 from jinja2 import Template
@@ -10,11 +11,11 @@ class ExtrasService(Service):
         s = self.app.services
         s.task_service.started('copy_extras')
         contents_path = path.join(workdir, 'contents')
-        if not path.exists(contents_path + '/pool/extras'):
-            os.makedirs(contents_path + '/pool/extras')
+        os.system('sudo mkdir -p ' + contents_path + '/pool/extras')
         if not path.exists(extras_path):
             os.makedirs(extras_path)
-        copy_tree(extras_path, path.join(contents_path, 'pool', 'extras'))
+        os.system('sudo rsync -a ' + extras_path + '/ ' + path.join(contents_path, 'pool', 'extras'))
+        os.popen('sudo chown -R ' + getuser() + ':' + getuser() + ' ' + path.join(contents_path, 'pool', 'extras'))
         s.task_service.finished('copy_extras')
 
     def build_repository(self, workdir, name, passphrase, dist):
@@ -64,21 +65,22 @@ class ExtrasService(Service):
             context=context
         )
         os.chdir(contents_path)
-        if not path.exists(path.join(contents_path, 'dists/stable/extras/binary-amd64')):
-            os.makedirs(path.join(contents_path, 'dists/stable/extras/binary-amd64'))
+        os.system('sudo mkdir -p ' + path.join(contents_path, 'dists/stable/extras/binary-amd64'))
         os.system('''
-        apt-ftparchive packages pool/extras > dists/stable/extras/binary-amd64/Packages
-        gzip -c dists/stable/extras/binary-amd64/Packages | tee dists/stable/extras/binary-amd64/Packages.gz > /dev/null
-        apt-ftparchive -c ''' + ftp_archive_dest_path + '''/release.conf generate ''' + ftp_archive_dest_path + '''/apt-ftparchive-deb.conf
-        apt-ftparchive -c ''' + ftp_archive_dest_path + '''/release.conf generate ''' + ftp_archive_dest_path + '''/apt-ftparchive-udeb.conf
-        apt-ftparchive -c ''' + ftp_archive_dest_path + '''/release.conf generate ''' + ftp_archive_dest_path + '''/apt-ftparchive-extras.conf
-        apt-ftparchive -c ''' + ftp_archive_dest_path + '''/release.conf release ''' + contents_path + '''/dists/''' + dist + ''' > ''' + contents_path + '''/dists/''' + dist + '''/Release
-        (echo ''' + passphrase + ') | gpg2 --batch --yes --passphrase-fd 0 --default-key "' + name + '" --output ' + contents_path + '/dists/' + dist + '/Release.gpg -ba ' + contents_path + '/dists/' + dist + '''/Release
+        sudo apt-ftparchive packages pool/extras | sudo tee dists/stable/extras/binary-amd64/Packages > /dev/null
+        sudo gzip -c dists/stable/extras/binary-amd64/Packages | sudo tee dists/stable/extras/binary-amd64/Packages.gz > /dev/null
+        sudo apt-ftparchive -c ''' + ftp_archive_dest_path + '/release.conf generate ' + ftp_archive_dest_path + '''/apt-ftparchive-deb.conf
+        sudo apt-ftparchive -c ''' + ftp_archive_dest_path + '/release.conf generate ' + ftp_archive_dest_path + '''/apt-ftparchive-udeb.conf
+        sudo apt-ftparchive -c ''' + ftp_archive_dest_path + '/release.conf generate ' + ftp_archive_dest_path + '''/apt-ftparchive-extras.conf
+        sudo apt-ftparchive -c ''' + ftp_archive_dest_path + '/release.conf release ' + contents_path + '/dists/' + dist + ' | sudo tee ' + contents_path + '/dists/' + dist + '''/Release > /dev/null
         ''')
+        os.system('''
+        (echo ''' + passphrase + ') | sudo gpg2 --batch --yes --passphrase-fd 0 --default-key "' + name + '''" \
+        --output ''' + path.join(contents_path, 'dists', dist, 'Release.gpg') + ' -ba ' + path.join(contents_path, 'dists', dist, 'Release') + '''
+        ''')
+        os.popen('sudo chown -R ' + getuser() + ':' + getuser() + ' ' + path.join(contents_path, 'dists'))
         md5sum = os.popen('find \. -type f -print0 | xargs -0 md5sum').read()
-        with open(path.join(contents_path, 'md5sum.txt'), 'w') as f:
-            f.write(md5sum)
-            f.close()
+        os.popen('echo ' + md5sum + ' | sudo tee ' + path.join(contents_path, 'md5sum.txt')).read()
         os.chdir(workdir)
         s.task_service.finished('build_repository')
 

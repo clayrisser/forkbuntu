@@ -36,6 +36,7 @@ class GpgService(Service):
     def generate_keyfile(self, name, comment, passphrase, email, workdir):
         s = self.app.services
         s.task_service.started('generate_keyfile')
+        filesystem_path = path.join(workdir, 'filesystem')
         keyring = os.popen('find * -maxdepth 1 -name "ubuntu-keyring*" -type d -print').read().split('\n')[0]
         if len(keyring) <= 0:
             os.system('apt-get source ubuntu-keyring')
@@ -58,9 +59,9 @@ class GpgService(Service):
         os.chdir(path.abspath('..'))
         os.system('dpkg-buildpackage -rfakeroot -m"' + keyid + '" -k"' + keyid + '"')
         keyfile = path.join(os.getcwd(), 'keyrings', 'ubuntu-archive-keyring.gpg')
-        copyfile(keyfile, path.join(workdir, 'filesystem/etc/apt/trusted.gpg'))
-        copyfile(keyfile, path.join(workdir, 'filesystem/usr/share/keyrings/ubuntu-archive-keyring.gpg'))
-        copyfile(keyfile, path.join(workdir, 'filesystem/var/lib/apt/keyrings/ubuntu-archive-keyring.gpg'))
+        os.system('sudo cp ' + keyfile + ' ' + path.join(filesystem_path, '/etc/apt/trusted.gpg'))
+        os.system('sudo cp ' + keyfile + ' ' + path.join(filesystem_path, '/usr/share/keyrings/ubuntu-archive-keyring.gpg'))
+        os.system('sudo cp ' + keyfile + ' ' + path.join(filesystem_path, '/var/lib/apt/keyrings/ubuntu-archive-keyring.gpg'))
         s.task_service.finished('generate_keyfile')
 
     def get_key_id(self, name, email):

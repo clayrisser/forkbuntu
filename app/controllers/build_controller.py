@@ -1,6 +1,7 @@
 from __future__ import print_function
 import getpass
 import os
+from app.exceptions.base_exceptions import DefaultException
 from builtins import input
 from cement.core.controller import expose
 from cfoundation import Controller
@@ -69,6 +70,7 @@ class BuildController(Controller):
         s = self.app.services
         prompt = s.helper_service.prompt
         pargs = self.app.pargs
+        os.system('sudo echo')
         s.setup_service.validate_deps()
         image = pargs.image
         if not image:
@@ -101,7 +103,6 @@ class BuildController(Controller):
         if not output:
             default_output = path.join(os.getcwd(), 'custom.iso')
             output = path.abspath(path.join(os.getcwd(), prompt('output', default_output)))
-        print('output: ' + output)
         s.setup_service.init_workdir(workdir)
         os.chdir(workdir)
         s.gpg_service.create_key(

@@ -1,4 +1,5 @@
 import os
+from getpass import getuser
 from cfoundation import Service
 
 class FilesystemService(Service):
@@ -10,8 +11,7 @@ class FilesystemService(Service):
         filesystem_path = workdir + '/filesystem'
         os.chdir(filesystem_path)
         filesystem_size = os.popen('du -sx --block-size=1 ./').read().split('\t')[0]
-        with open(contents_path + '/install/filesystem.size', 'w') as f:
-            f.write(filesystem_size)
-            f.close()
+        os.popen('echo ' + filesystem_size + ' | sudo tee ' + contents_path + '/install/filesystem.size').read()
+        os.popen('sudo chown ' + getuser() + ':' + getuser() + ' ' + contents_path + '/install/filesystem.size')
         os.chdir(workdir)
         s.task_service.finished('update_filesystem_size')
