@@ -12,7 +12,8 @@ class Config(Service):
                 'mount': '.tmp/iso',
                 'output': 'forkbuntu.iso',
                 'working': os.getcwd()
-            }
+            },
+            'packages': []
         }
         with open(path.abspath('config.yml'), 'r') as f:
             try:

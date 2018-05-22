@@ -1,3 +1,5 @@
 cement==2.10.12
+Jinja2==2.10
+MarkupSafe==1.0
 pydash==4.5.0
 PyYAML==3.12

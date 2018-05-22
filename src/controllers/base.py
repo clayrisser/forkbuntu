@@ -14,6 +14,10 @@ class Base(Controller):
         print(json.dumps(config, indent=4, sort_keys=True))
         paths = config['paths']
         self.app.services.unpack.mount_iso(paths['iso'], paths['mount'])
-        self.app.services.configure.merge_files(paths['working'], paths['mount'])
+        self.app.services.configure.merge_files(
+            paths['working'],
+            paths['mount'],
+            config['packages']
+        )
         self.app.services.pack.sign(paths['mount'])
         self.app.services.pack.build(paths['mount'], paths['output'])
