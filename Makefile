@@ -5,24 +5,19 @@ all: clean
 
 .PHONY: start
 start: env
-	@env/bin/python app build --debug
+	@cd example && ../env/bin/python3 ../src
 
 env:
 	@virtualenv env
-	@env/bin/pip install -r ./requirements.txt
+	@env/bin/pip3 install -r ./requirements.txt
 	@echo ::: ENV :::
 
 .PHONY: freeze
 freeze:
-	@env/bin/pip freeze > ./requirements.txt
+	@env/bin/pip3 freeze > ./requirements.txt
 	@echo ::: FREEZE :::
 
 .PHONY: clean
 clean:
-	-@sudo rm -rf ./tmp ./**/*.pyc ./**/**/*.pyc *.iso &>/dev/null || true
+	-@rm -rf */__pycache__ */*/__pycache__ >/dev/null || true
 	@echo ::: CLEAN :::
-
-.PHONY: purge
-purge: clean
-	-@rm -rf ./env ./extras &>/dev/null || true
-	@echo ::: PURGE :::

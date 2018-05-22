@@ -1,0 +1,4 @@
+# paths:
+#   iso: ubuntu-18.04-server-amd64.iso
+#   mount: .tmp/iso
+#   output: example.iso
