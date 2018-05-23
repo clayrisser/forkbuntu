@@ -6,9 +6,10 @@ import os
 import shutil
 
 class Configure(Service):
-    def merge_files(self):
+    def merge_iso(self):
         c = self.app.conf
-        copy_tree(path.join(c.paths.src, 'iso'), c.paths.mount)
+        if path.isdir(path.join(c.paths.src, 'iso')):
+            copy_tree(path.join(c.paths.src, 'iso'), c.paths.mount)
         self.__stamp_template(path.join(c.paths.mount, 'preseed', 'forkbuntu.seed'), packages=c.packages)
         self.__stamp_template(path.join(c.paths.mount, '.disk', 'info'), name=c.name, version=c.version)
         self.__stamp_template(path.join(c.paths.mount, 'README.diskdefines'), name=c.name, version=c.version)
@@ -16,6 +17,13 @@ class Configure(Service):
             copy_tree(path.join(c.paths.cwd, 'scripts'), path.join(c.paths.mount, 'scripts'))
         if path.isdir(path.join(c.paths.cwd, 'iso')):
             copy_tree(path.join(c.paths.cwd, 'iso'), c.paths.mount)
+
+    def merge_filesystem(self):
+        c = self.app.conf
+        if path.isdir(path.join(c.paths.src, 'filesystem')):
+            copy_tree(path.join(c.paths.src, 'filesystem'), c.paths.filesystem)
+        if path.isdir(path.join(c.paths.cwd, 'filesystem')):
+            copy_tree(path.join(c.paths.cwd, 'filesystem'), c.paths.filesystem)
 
     def sign(self):
         c = self.app.conf
