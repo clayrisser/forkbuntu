@@ -64,10 +64,11 @@ Review the [changelog](https://github.com/codejamninja/forkbuntu/blob/master/CHA
 ## Credits
 
 * [Jam Risser](https://codejam.ninja) - Author
+* [Debian Installer Preseed](https://wiki.debian.org/DebianInstaller/Preseed)
+* [Debian Installer Templates](https://people.debian.org/~plessy/DebianInstallerDebconfTemplates.html)
 * [Ubiquity Automation](https://wiki.ubuntu.com/UbiquityAutomation)
 * [Ubuntu Derivative Distro How to](https://wiki.ubuntu.com/DerivativeDistroHowto)
 * [Ubuntu Install CD Customization](https://help.ubuntu.com/community/InstallCDCustomization)
-* [Debian Installer Preseed](https://wiki.debian.org/DebianInstaller/Preseed)
 * [Ubuntu Live CD Customization](https://help.ubuntu.com/community/LiveCDCustomization)
 
 

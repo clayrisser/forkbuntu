@@ -42,6 +42,7 @@ App = create_app(
             'output': 'forkbuntu.iso',
             'src': path.dirname(path.realpath(__file__)),
             'tmp': mkdtemp()
-        }
+        },
+        'repos': []
     })
 )

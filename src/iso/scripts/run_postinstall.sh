@@ -5,5 +5,5 @@ unset DEBCONF_FRONTEND
 unset DEBIAN_HAS_FRONTEND
 unset DEBIAN_FRONTEND
 
-bash post_install.sh
+bash postinstall.sh
 rm -rf /root/scripts

@@ -6,3 +6,6 @@ paths:
   output: forkbuntu.iso
 packages:
   - cowsay
+repos:
+  - repo: 'http://repo.sinew.in/ stable main'
+    key: https://www.google.com

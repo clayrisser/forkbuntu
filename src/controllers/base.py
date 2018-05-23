@@ -25,7 +25,8 @@ class Base(Controller):
             'version': c.version if 'version' in c else release.distrib_version
         }))
         self.app.conf = munchify(_.merge({}, self.app.conf, {
-            'description': c.description if 'description' in c else c.name + ' ' + c.version
+            'description': c.description if 'description' in c else c.name + ' ' + c.version,
+            'hostname': c.hostname if 'hostname' in c else _.snake_case(c.name)
         }))
         print('conf', json.dumps(self.app.conf, indent=4, sort_keys=True))
         self.app.services.configure.merge_iso()

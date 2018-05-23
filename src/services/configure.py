@@ -12,7 +12,12 @@ class Configure(Service):
         c = self.app.conf
         if path.isdir(path.join(c.paths.src, 'iso')):
             copy_tree(path.join(c.paths.src, 'iso'), c.paths.mount)
-        self.__stamp_template(path.join(c.paths.mount, 'preseed', 'forkbuntu.seed'), packages=c.packages)
+        self.__stamp_template(
+            path.join(c.paths.mount, 'preseed', 'forkbuntu.seed'),
+            hostname=c.hostname,
+            packages=c.packages,
+            repos=c.repos
+        )
         self.__stamp_template(path.join(c.paths.mount, '.disk', 'info'), description=c.description)
         self.__stamp_template(path.join(c.paths.mount, 'README.diskdefines'), description=c.description)
         if path.isdir(path.join(c.paths.cwd, 'scripts')):
