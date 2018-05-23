@@ -8,7 +8,7 @@ class Pack(Service):
         c = self.app.conf
         os.symlink(c.paths.mount, path.join(c.paths.mount, 'ubuntu'))
         os.system('''
-        mkisofs -r -V "Custom Ubuntu Install CD" \
+        mkisofs -r -V "''' + c.name + ''' Install CD" \
         -cache-inodes \
         -J -l -b isolinux/isolinux.bin \
         -c isolinux/boot.cat -no-emul-boot \
@@ -30,3 +30,6 @@ class Pack(Service):
             'mksquashfs ' + c.paths.filesystem + ' ' +
             path.join(c.paths.install, 'filesystem.squashfs') + compress
         )
+        size = os.popen('du -sx --block-size=1 ' + c.paths.filesystem + ' | cut -f1').read()
+        with open(path.join(c.paths.install, 'filesystem.size'), 'w') as f:
+            f.write(size)

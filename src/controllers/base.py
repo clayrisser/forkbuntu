@@ -14,6 +14,7 @@ class Base(Controller):
         self.app.services.unpack.iso()
         self.app.services.unpack.filesystem()
         self.app.services.configure.merge_files()
+        self.app.services.configure.chroot()
         self.app.services.configure.sign()
         self.app.services.pack.filesystem()
         self.app.services.pack.iso()

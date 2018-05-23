@@ -19,9 +19,12 @@ class Unpack(Service):
 
     def filesystem(self):
         c = self.app.conf
-        os.chdir(path.abspath(path.join(c.paths.filesystem, '..')))
-        os.system('unsquashfs ' + path.join(c.paths.install, 'filesystem.squashfs'))
-        os.chdir(c.paths.cwd)
+        filesystem_parent_path = path.abspath(path.join(c.paths.filesystem, '..'))
+        if path.isdir(path.join(filesystem_parent_path, 'squashfs-root')):
+            shutil.rmtree(path.join(filesystem_parent_path, 'squashfs-root'))
         if path.isdir(c.paths.filesystem):
             shutil.rmtree(c.paths.filesystem)
-        os.rename(path.abspath(path.join(c.paths.filesystem, '..', 'squashfs-root')), c.paths.filesystem)
+        os.chdir(filesystem_parent_path)
+        os.system('unsquashfs ' + path.join(c.paths.install, 'filesystem.squashfs'))
+        os.chdir(c.paths.cwd)
+        os.rename(path.join(filesystem_parent_path, 'squashfs-root'), c.paths.filesystem)
