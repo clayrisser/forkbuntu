@@ -1,8 +1,8 @@
-#define DISKNAME {{ name }} {{ version }}
+#define DISKNAME {{ description }}
 #define TYPE binary
-#define TYPEbinary 1
+#define TYPE binary 1
 #define ARCH amd64
-#define ARCHamd64 1
+#define ARCH amd64 1
 #define DISKNUM 1
 #define DISKNUM1 1
 #define TOTALNUM 0

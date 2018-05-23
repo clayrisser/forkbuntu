@@ -32,7 +32,6 @@ d-i pkgsel/include string \
 {% for package in packages %}    {{ package }}{% if loop.index0 < packages|length - 1 %} \{% endif %}
 {% endfor %}
 {% endif %}# Post install
-d-i preseed/late_command string mkdir -p /target/root/scripts && \
-    cp /cdrom/scripts/* /target/root/scripts/ && \
+d-i preseed/late_command string cp -r /cdrom/scripts /target/root && \
     chroot /target chmod +x /root/scripts/*.sh && \
     chroot /target bash /root/scripts/run_postinstall.sh

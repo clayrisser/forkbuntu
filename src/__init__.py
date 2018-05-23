@@ -14,6 +14,8 @@ def load_conf(conf):
         except yaml.YAMLError as err:
             print(err)
             exit(1)
+    if 'version' in conf:
+        conf.version = str(conf.version)
     conf.paths.install = path.join(conf.paths.mount, 'casper')
     if not path.exists(path.join(conf.paths.install, 'filesystem.squashfs')):
         conf.paths.install = path.join(conf.paths.mount, 'install')
@@ -31,7 +33,6 @@ App = create_app(
         'filesystem': {
             'compress': False
         },
-        'name': 'Forkbuntu',
         'packages': [],
         'paths': {
             'cwd': os.getcwd(),

@@ -1,8 +1,10 @@
 from cfoundation import Service
 from distutils.dir_util import copy_tree
 from jinja2 import Template
+from munch import Munch
 from os import path
 import os
+import re
 import shutil
 
 class Configure(Service):
@@ -11,17 +13,39 @@ class Configure(Service):
         if path.isdir(path.join(c.paths.src, 'iso')):
             copy_tree(path.join(c.paths.src, 'iso'), c.paths.mount)
         self.__stamp_template(path.join(c.paths.mount, 'preseed', 'forkbuntu.seed'), packages=c.packages)
-        self.__stamp_template(path.join(c.paths.mount, '.disk', 'info'), name=c.name, version=c.version)
-        self.__stamp_template(path.join(c.paths.mount, 'README.diskdefines'), name=c.name, version=c.version)
+        self.__stamp_template(path.join(c.paths.mount, '.disk', 'info'), description=c.description)
+        self.__stamp_template(path.join(c.paths.mount, 'README.diskdefines'), description=c.description)
         if path.isdir(path.join(c.paths.cwd, 'scripts')):
             copy_tree(path.join(c.paths.cwd, 'scripts'), path.join(c.paths.mount, 'scripts'))
         if path.isdir(path.join(c.paths.cwd, 'iso')):
             copy_tree(path.join(c.paths.cwd, 'iso'), c.paths.mount)
 
+    def load_release(self):
+        c = self.app.conf
+        release = Munch()
+        matches = None
+        with open(path.join(c.paths.filesystem, 'etc/lsb-release'), 'r') as f:
+            matches = re.finditer(r'(^[^=\n\s]+)\=([^\=\n]*$)', f.read(), re.MULTILINE)
+        for key, match in enumerate(matches):
+            groups = match.groups()
+            if (len(groups) >= 2):
+                value = groups[1]
+                if (value.startswith('"') and value.endswith('"')) or (value.startswith('\'') and value.endswith('\'')):
+                    value = value[1:-1]
+                release[groups[0].lower()] = value
+        return release
+
     def merge_filesystem(self):
         c = self.app.conf
         if path.isdir(path.join(c.paths.src, 'filesystem')):
             copy_tree(path.join(c.paths.src, 'filesystem'), c.paths.filesystem)
+        self.__stamp_template(
+            path.join(c.paths.filesystem, 'etc/lsb-release'),
+            codename=c.codename,
+            description=c.description,
+            distrib_id=c.distrib_id,
+            version=c.version
+        )
         if path.isdir(path.join(c.paths.cwd, 'filesystem')):
             copy_tree(path.join(c.paths.cwd, 'filesystem'), c.paths.filesystem)
 
