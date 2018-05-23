@@ -4,9 +4,9 @@ import os
 import shutil
 
 class Unpack(Service):
-    def mount_iso(self):
+    def iso(self):
         c = self.app.conf
-        tmp_mount_path = path.join(c.paths.tmp, 'forkbuntu', 'iso')
+        tmp_mount_path = path.join(c.paths.tmp, 'iso')
         os.system('umount ' + tmp_mount_path + ' 2>/dev/null')
         if path.isdir(tmp_mount_path):
             shutil.rmtree(tmp_mount_path)
@@ -16,3 +16,12 @@ class Unpack(Service):
         os.system('mount -o loop ' + c.paths.iso + ' ' + tmp_mount_path)
         shutil.copytree(tmp_mount_path, c.paths.mount, ignore=shutil.ignore_patterns('ubuntu'))
         os.system('umount ' + tmp_mount_path)
+
+    def filesystem(self):
+        c = self.app.conf
+        os.chdir(path.abspath(path.join(c.paths.filesystem, '..')))
+        os.system('unsquashfs ' + path.join(c.paths.install, 'filesystem.squashfs'))
+        os.chdir(c.paths.cwd)
+        if path.isdir(c.paths.filesystem):
+            shutil.rmtree(c.paths.filesystem)
+        os.rename(path.abspath(path.join(c.paths.filesystem, '..', 'squashfs-root')), c.paths.filesystem)

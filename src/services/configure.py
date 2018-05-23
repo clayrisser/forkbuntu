@@ -15,6 +15,13 @@ class Configure(Service):
         if path.isdir(path.join(c.paths.cwd, 'iso')):
             copy_tree(path.join(c.paths.cwd, 'iso'), c.paths.mount)
 
+    def sign(self):
+        c = self.app.conf
+        os.system('cd ' + c.paths.mount + ''' && \
+        find . -path ./isolinux -prune -o  -path ./md5sum.txt -prune -o -type f -print0 | \
+        xargs -0 md5sum > md5sum.txt
+        ''')
+
     def __stamp_template(self, template_path, **kwargs):
         template_path = path.abspath(template_path)
         body = ''

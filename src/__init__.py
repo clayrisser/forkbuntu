@@ -2,37 +2,45 @@ from . import controllers, services
 from cfoundation import create_app
 from os import path
 from pydash import _
-from tempfile import gettempdir
+from tempfile import mkdtemp
 import os
 import yaml
+from munch import munchify
 
-def load_config(config):
+def load_conf(conf):
     with open(path.abspath('config.yml'), 'r') as f:
         try:
-            config = _.merge({}, config, yaml.load(f))
+            conf = munchify(_.merge({}, conf, yaml.load(f)))
         except yaml.YAMLError as err:
             print(err)
             exit(1)
-    return _.merge({}, config, {
+    conf.paths.install = path.join(conf.paths.mount, 'casper')
+    if not path.exists(path.join(conf.paths.install, 'filesystem.squashfs')):
+        conf.paths.install = path.join(conf.paths.mount, 'install')
+    return munchify(_.merge({}, conf, {
         'paths': _.zip_object(
-            _.keys(config['paths']),
-            _.map(config['paths'], lambda item: path.abspath(path.join(config['paths']['cwd'], item)))
+            _.keys(conf.paths),
+            _.map(conf.paths, lambda item: path.abspath(path.join(conf.paths.cwd, item)))
         )
-    })
+    }))
 
 App = create_app(
     controllers=controllers,
     services=services,
-    config=load_config({
+    conf=load_conf({
+        'filesystem': {
+            'compress': False
+        },
         'name': 'Forkbuntu',
         'packages': [],
         'paths': {
             'cwd': os.getcwd(),
+            'filesystem': '.tmp/filesystem',
             'iso': 'ubuntu-18.04-server-amd64.iso',
             'mount': '.tmp/iso',
             'output': 'forkbuntu.iso',
             'src': path.dirname(path.realpath(__file__)),
-            'tmp': gettempdir()
+            'tmp': mkdtemp()
         }
     })
 )

@@ -1,3 +1,4 @@
+from .clean import Clean
 from .configure import Configure
 from .gpg import GPG
 from .pack import Pack

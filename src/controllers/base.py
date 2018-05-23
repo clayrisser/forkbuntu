@@ -11,7 +11,10 @@ class Base(Controller):
     def default(self):
         self.app.services.setup.init()
         print(json.dumps(self.app.conf, indent=4, sort_keys=True))
-        self.app.services.unpack.mount_iso()
+        self.app.services.unpack.iso()
+        self.app.services.unpack.filesystem()
         self.app.services.configure.merge_files()
-        self.app.services.pack.sign()
-        self.app.services.pack.build()
+        self.app.services.configure.sign()
+        self.app.services.pack.filesystem()
+        self.app.services.pack.iso()
+        self.app.services.clean.tmp()

@@ -4,7 +4,7 @@ from pydash import _
 import inspect
 import re
 
-def create_app(controllers, services, config):
+def create_app(controllers, services, conf):
     class App(CementApp):
         class Meta:
             label = 'forkbuntu'
@@ -15,7 +15,7 @@ def create_app(controllers, services, config):
 
         def __init__(self):
             super().__init__()
-            self.conf = munchify(config)
+            self.conf = munchify(conf)
             self.services = self.__load_services(services)
 
         def run(self):

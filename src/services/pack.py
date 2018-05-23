@@ -1,9 +1,10 @@
 from cfoundation import Service
 from os import path
+from pydash import _
 import os
 
 class Pack(Service):
-    def build(self):
+    def iso(self):
         c = self.app.conf
         os.symlink(c.paths.mount, path.join(c.paths.mount, 'ubuntu'))
         os.system('''
@@ -16,9 +17,16 @@ class Pack(Service):
         )
         os.unlink(path.join(c.paths.mount, 'ubuntu'))
 
-    def sign(self):
+    def filesystem(self):
         c = self.app.conf
-        os.system('cd ' + c.paths.mount + ''' && \
-        find . -path ./isolinux -prune -o  -path ./md5sum.txt -prune -o -type f -print0 | \
-        xargs -0 md5sum > md5sum.txt
-        ''')
+        compress = ''
+        if c.filesystem.compress:
+            if _.is_number(c.filesystem.compress):
+                compress = ' -b ' + str(c.filesystem.compress)
+            else:
+                compress = ' -comp xz -e edit/boot'
+        os.remove(path.join(c.paths.install, 'filesystem.squashfs'))
+        os.system(
+            'mksquashfs ' + c.paths.filesystem + ' ' +
+            path.join(c.paths.install, 'filesystem.squashfs') + compress
+        )
