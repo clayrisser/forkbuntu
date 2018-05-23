@@ -7,6 +7,16 @@ all: clean
 start: env
 	@cd example && ../env/bin/python3 ../src
 
+.PHONY: install
+install: env
+
+.PHONY: uninstall
+uninstall:
+	-@rm -rf env >/dev/null || true
+
+.PHONY: reinstall
+reinstall: uninstall install
+
 env:
 	@virtualenv env
 	@env/bin/pip3 install -r ./requirements.txt

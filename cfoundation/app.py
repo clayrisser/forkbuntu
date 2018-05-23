@@ -1,9 +1,10 @@
+from munch import munchify
 from cement.core.foundation import CementApp
 from pydash import _
 import inspect
 import re
 
-def create_app(controllers, services):
+def create_app(controllers, services, config):
     class App(CementApp):
         class Meta:
             label = 'forkbuntu'
@@ -14,6 +15,7 @@ def create_app(controllers, services):
 
         def __init__(self):
             super().__init__()
+            self.conf = munchify(config)
             self.services = self.__load_services(services)
 
         def run(self):

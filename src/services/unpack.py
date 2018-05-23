@@ -1,20 +1,18 @@
 from cfoundation import Service
 from os import path
-from tempfile import gettempdir
 import os
 import shutil
 
 class Unpack(Service):
-    def mount_iso(self, iso_path, mount_path):
-        iso_path = path.abspath(iso_path)
-        tmp_mount_path = path.abspath(path.join(gettempdir(), 'forkbuntu', 'iso'))
-        mount_path = path.abspath(mount_path)
+    def mount_iso(self):
+        c = self.app.conf
+        tmp_mount_path = path.join(c.paths.tmp, 'forkbuntu', 'iso')
         os.system('umount ' + tmp_mount_path + ' 2>/dev/null')
         if path.isdir(tmp_mount_path):
             shutil.rmtree(tmp_mount_path)
         os.makedirs(tmp_mount_path)
-        if path.isdir(mount_path):
-            shutil.rmtree(mount_path)
-        os.system('mount -o loop ' + iso_path + ' ' + tmp_mount_path)
-        shutil.copytree(tmp_mount_path, mount_path, ignore=shutil.ignore_patterns('ubuntu'))
+        if path.isdir(c.paths.mount):
+            shutil.rmtree(c.paths.mount)
+        os.system('mount -o loop ' + c.paths.iso + ' ' + tmp_mount_path)
+        shutil.copytree(tmp_mount_path, c.paths.mount, ignore=shutil.ignore_patterns('ubuntu'))
         os.system('umount ' + tmp_mount_path)

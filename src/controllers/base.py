@@ -10,14 +10,8 @@ class Base(Controller):
     @expose()
     def default(self):
         self.app.services.setup.init()
-        config = self.app.services.config.load()
-        print(json.dumps(config, indent=4, sort_keys=True))
-        paths = config['paths']
-        self.app.services.unpack.mount_iso(paths['iso'], paths['mount'])
-        self.app.services.configure.merge_files(
-            paths['working'],
-            paths['mount'],
-            config['packages']
-        )
-        self.app.services.pack.sign(paths['mount'])
-        self.app.services.pack.build(paths['mount'], paths['output'])
+        print(json.dumps(self.app.conf, indent=4, sort_keys=True))
+        self.app.services.unpack.mount_iso()
+        self.app.services.configure.merge_files()
+        self.app.services.pack.sign()
+        self.app.services.pack.build()
