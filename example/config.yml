@@ -1,11 +1,7 @@
 name: Forkbuntu
 version: 18.04
-release_notes: https://forkbuntu.codejam.ninja
 paths:
   iso: ubuntu-18.04-server-amd64.iso
   output: forkbuntu.iso
 packages:
   - cowsay
-repos:
-  - repo: 'http://repo.sinew.in/ stable main'
-    key: https://www.google.com

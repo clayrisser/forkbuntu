@@ -29,8 +29,9 @@ d-i pkgsel/include string \
 {% for package in packages %}    {{ package }}{% if loop.index0 < packages|length - 1 %} \{% endif %}
 {% endfor %}
 {% endif %}# Post install
-d-i preseed/late_command string cp -r /cdrom/scripts /target/root && \
-    chroot /target bash /root/scripts/run_postinstall.sh
+d-i preseed/late_command string \
+    cp -r /cdrom/scripts /target/root && \
+    string chroot /target bash /root/scripts/run_postinstall.sh
 
 # Network configuration
 d-i netcfg/get_hostname string {{ hostname }}
@@ -40,9 +41,6 @@ d-i netcfg/get_hostname seen false
 tasksel tasksel/first multiselect standard
 
 # Apt setup
-{% for repo in repos %}d-i apt-setup/local{{ loop.index0 }}/repository string {{ repo.repo }}
-d-i apt-setup/local0/source boolean true{% if repo.key %}
-d-i apt-setup/local{{ loop.index0 }}/key string {{ repo.key }}{% endif %}{% endfor %}
 d-i apt-setup/restricted boolean true
 d-i apt-setup/universe boolean true
 d-i apt-setup/multiarch string i386

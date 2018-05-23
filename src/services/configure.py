@@ -15,8 +15,7 @@ class Configure(Service):
         self.__stamp_template(
             path.join(c.paths.mount, 'preseed', 'forkbuntu.seed'),
             hostname=c.hostname,
-            packages=c.packages,
-            repos=c.repos
+            packages=c.packages
         )
         self.__stamp_template(path.join(c.paths.mount, '.disk', 'info'), description=c.description)
         self.__stamp_template(path.join(c.paths.mount, 'README.diskdefines'), description=c.description)
