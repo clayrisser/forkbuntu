@@ -47,7 +47,7 @@ class Configure(Service):
         os.environ['HOME'] = path.abspath('/root')
         os.environ['LC_ALL'] = 'C'
         os.system('bash /root/scripts/filesystem.sh')
-        os.system('umount /proc')
+        os.system('umount /proc || umount -lf /proc')
         os.system('umount /sys')
         os.system('umount /dev/pts')
         os.fchdir(root)
