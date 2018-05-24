@@ -31,7 +31,17 @@ freeze:
 	@env/bin/pip3 freeze > ./requirements.txt
 	@echo ::: FREEZE :::
 
+dist: env
+	@python setup.py sdist
+	@python setup.py bdist_wheel
+	@echo ran dist
+
+.PHONY: publish
+publish: dist
+	@twine upload dist/*
+	@echo published
+
 .PHONY: clean
 clean:
-	-@rm -rf */__pycache__ */*/__pycache__ >/dev/null || true
+	-@rm -rf */__pycache__ */*/__pycache__ README.rst >/dev/null || true
 	@echo ::: CLEAN :::
