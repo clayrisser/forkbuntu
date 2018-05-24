@@ -1,6 +1,6 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from src import App
+from forkbuntu import App
 
 def main():
     with App() as app:

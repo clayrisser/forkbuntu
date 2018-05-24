@@ -18,7 +18,7 @@ Please ★ this repo if you found it useful ★ ★ ★
 ## Installation
 
 ```sh
-sudo pip install forkbuntu
+sudo pip3 install forkbuntu
 ```
 
 

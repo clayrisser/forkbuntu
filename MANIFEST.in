@@ -1,0 +1,3 @@
+include forkbuntu/logger.yml
+recursive-include forkbuntu/filesystem *
+recursive-include forkbuntu/iso *

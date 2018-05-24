@@ -21,7 +21,7 @@ with open(path.join(here, 'requirements.txt'), 'r', encoding='utf-8') as f:
 setup(
     name='forkbuntu',
 
-    version='0.1.0',
+    version='0.1.5',
 
     description='Easily create your own ubuntu distribution and install cd',
 
@@ -55,7 +55,9 @@ setup(
 
     install_requires=install_requires,
 
+    include_package_data=True,
+
     entry_points = {
-        'console_scripts': ['forkbuntu=src.__main__:main'],
+        'console_scripts': ['forkbuntu=forkbuntu.__main__:main'],
     }
 )
