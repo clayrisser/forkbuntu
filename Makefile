@@ -7,6 +7,10 @@ all: clean
 start: env
 	@cd example && ../env/bin/python3 ../src
 
+.PHONY: debug
+debug: env
+	@cd example && ../env/bin/python3 ../src --debug
+
 .PHONY: install
 install: env
 

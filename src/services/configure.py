@@ -53,14 +53,14 @@ class Configure(Service):
         if path.isdir(path.join(c.paths.cwd, 'filesystem')):
             copy_tree(path.join(c.paths.cwd, 'filesystem'), c.paths.filesystem)
 
-    def sign(self):
+    def sign_iso(self):
         c = self.app.conf
         os.system('cd ' + c.paths.mount + ''' && \
         find . -path ./isolinux -prune -o  -path ./md5sum.txt -prune -o -type f -print0 | \
         xargs -0 md5sum > md5sum.txt
         ''')
 
-    def chroot(self):
+    def filesystem(self):
         c = self.app.conf
         os.rename(path.join(c.paths.filesystem, 'etc/resolv.conf'), path.join(c.paths.filesystem, 'etc/_resolv.conf'))
         shutil.copyfile(path.abspath('/etc/resolv.conf'), path.join(c.paths.filesystem, 'etc/resolv.conf'))

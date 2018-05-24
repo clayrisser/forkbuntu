@@ -27,6 +27,7 @@ def load_conf(conf):
     }))
 
 App = create_app(
+    name='forkbuntu',
     controllers=controllers,
     services=services,
     conf=load_conf({

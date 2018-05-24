@@ -1,4 +1,5 @@
 from cement.core.controller import CementBaseController
 
 class Controller(CementBaseController):
-    pass
+    def init(self):
+        self.log = self.app.log
