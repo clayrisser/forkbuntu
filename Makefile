@@ -5,11 +5,11 @@ all: clean
 
 .PHONY: start
 start: env
-	@cd example && ../env/bin/python3 ../src
+	@cd example && ../env/bin/python3 ../forkbuntu
 
 .PHONY: debug
 debug: env
-	@cd example && ../env/bin/python3 ../src --debug
+	@cd example && ../env/bin/python3 ../forkbuntu --debug
 
 .PHONY: install
 install: env

@@ -15,9 +15,13 @@ class Base(Controller):
     def default(self):
         log = self.app.log
         c = self.app.conf
+        s = self.app.services
         self.app.spinner = Halo(text='initializing').start()
-        self.app.services.setup.init()
+        s.setup.init()
         self.app.spinner.succeed('initialized')
+        setattr(self.app, 'gpg_keys', s.gpg.get_keys())
+        gpg_keys = self.app.gpg_keys
+        log.debug('gpg_keys: ' + json.dumps(gpg_keys, indent=4, sort_keys=True))
         self.app.spinner = Halo(text='unpacking iso').start()
         self.app.services.unpack.iso()
         self.app.spinner.succeed('unpacked iso')

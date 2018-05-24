@@ -4,3 +4,4 @@ from .gpg import GPG
 from .pack import Pack
 from .setup import Setup
 from .unpack import Unpack
+from .util import Util
