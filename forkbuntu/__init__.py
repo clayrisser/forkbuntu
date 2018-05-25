@@ -36,8 +36,10 @@ App = create_app(
         },
         'packages': [],
         'paths': {
+            'apt_ftparchive': '.tmp/apt-ftparchive',
             'cwd': os.getcwd(),
             'filesystem': '.tmp/filesystem',
+            'indices': '.tmp/indices',
             'iso': 'ubuntu-18.04-server-amd64.iso',
             'keyring': '.tmp/keyring',
             'mount': '.tmp/iso',

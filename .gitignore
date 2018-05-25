@@ -107,3 +107,4 @@ venv.bak/
 *.iso
 .tmp/
 README.rst
+*.deb

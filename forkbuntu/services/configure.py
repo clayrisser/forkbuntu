@@ -1,6 +1,5 @@
 from cfoundation import Service
 from distutils.dir_util import copy_tree
-from jinja2 import Template
 from munch import Munch
 from os import path
 import os
@@ -10,17 +9,22 @@ import shutil
 class Configure(Service):
     def merge_iso(self):
         c = self.app.conf
+        s = self.app.services
         if path.isdir(path.join(c.paths.src, 'iso')):
             copy_tree(path.join(c.paths.src, 'iso'), c.paths.mount)
-        self.__stamp_template(
+        s.util.stamp_template(
             path.join(c.paths.mount, 'preseed', 'forkbuntu.seed'),
             hostname=c.hostname,
             packages=c.packages
         )
-        self.__stamp_template(path.join(c.paths.mount, '.disk', 'info'), description=c.description)
-        self.__stamp_template(path.join(c.paths.mount, 'README.diskdefines'), description=c.description)
+        s.util.stamp_template(path.join(c.paths.mount, '.disk', 'info'), description=c.description)
+        s.util.stamp_template(path.join(c.paths.mount, 'README.diskdefines'), description=c.description)
         if path.isdir(path.join(c.paths.cwd, 'scripts')):
             copy_tree(path.join(c.paths.cwd, 'scripts'), path.join(c.paths.mount, 'scripts'))
+        if path.isdir(path.join(c.paths.cwd, 'extras')):
+            copy_tree(path.join(c.paths.cwd, 'extras'), path.join(c.paths.mount, 'pool/extras'))
+        if not path.isdir(path.join(c.paths.mount, 'pool/extras')):
+            os.makedirs(path.join(c.paths.mount, 'pool/extras'))
         if path.isdir(path.join(c.paths.cwd, 'iso')):
             copy_tree(path.join(c.paths.cwd, 'iso'), c.paths.mount)
 
@@ -41,9 +45,10 @@ class Configure(Service):
 
     def merge_filesystem(self):
         c = self.app.conf
+        s = self.app.services
         if path.isdir(path.join(c.paths.src, 'filesystem')):
             copy_tree(path.join(c.paths.src, 'filesystem'), c.paths.filesystem)
-        self.__stamp_template(
+        s.util.stamp_template(
             path.join(c.paths.filesystem, 'etc/lsb-release'),
             codename=c.codename,
             description=c.description,
@@ -84,13 +89,3 @@ class Configure(Service):
         os.system('umount ' + path.join(c.paths.filesystem, 'dev'))
         shutil.rmtree(path.join(c.paths.filesystem, 'root/scripts'))
         os.rename(path.join(c.paths.filesystem, 'etc/_resolv.conf'), path.join(c.paths.filesystem, 'etc/resolv.conf'))
-
-    def __stamp_template(self, template_path, **kwargs):
-        template_path = path.abspath(template_path)
-        body = ''
-        with open(template_path, 'r') as f:
-            body = f.read()
-        template = Template(body)
-        body = template.render(**kwargs) + '\n'
-        with open(template_path, 'w') as f:
-            f.write(body)

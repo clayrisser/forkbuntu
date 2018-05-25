@@ -6,6 +6,7 @@ from pydash import _
 from subprocess import Popen
 from time import sleep
 from time import sleep
+import glob
 import grp
 import json
 import os
@@ -14,7 +15,6 @@ import shutil
 import re
 
 class GPG(Service):
-
     ubuntu_keys = ['FBB75451', '437D05B5', 'C0B21F32', 'EFE21092']
 
     def restart(self):
@@ -75,6 +75,22 @@ class GPG(Service):
             + gpg_key.pub.key.short, real_user=True
         )
         self.app.spinner.start()
+        keyring_deb_path = _.filter(os.listdir(c.paths.keyring), lambda x: x[len(x) - 4:] == '.deb')
+        if len(keyring_deb_path) > 0:
+            keyring_deb_path = path.join(c.paths.keyring, keyring_deb_path[0])
+        else:
+            raise Exception('failed to build ubuntu-keyring')
+        for deb_path in glob.glob(path.join(c.paths.keyring, 'ubuntu-keyring*deb')):
+            shutil.copy(deb_path, path.join(c.paths.mount, 'pool/main/u/ubuntu-keyring'))
+        if not path.isdir(path.join(c.paths.filesystem, 'var/lib/apt/keyrings')):
+            os.makedirs(path.join(c.paths.filesystem, 'var/lib/apt/keyrings'))
+        if not path.isdir(path.join(c.paths.filesystem, 'etc/apt')):
+            os.makedirs(path.join(c.paths.filesystem, 'etc/apt'))
+        if not path.isdir(path.join(c.paths.filesystem, 'var/lib/apt/keyrings')):
+            os.makedirs(path.join(c.paths.filesystem, 'var/lib/apt/keyrings'))
+        shutil.copyfile(keyring_deb_path, path.join(c.paths.filesystem, 'usr/share/keyrings/ubuntu-archive-keyring.gpg'))
+        shutil.copyfile(keyring_deb_path, path.join(c.paths.filesystem, 'etc/apt/trusted.gpg'))
+        shutil.copyfile(keyring_deb_path, path.join(c.paths.filesystem, 'var/lib/apt/keyrings/ubuntu-archive-keyring.gpg'))
         os.chdir(c.paths.cwd)
 
     def gen_key(self):

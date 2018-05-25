@@ -1,9 +1,10 @@
 from cfoundation import Service
+from jinja2 import Template
 from os import path
 from subprocess import check_output, CalledProcessError, STDOUT, Popen, DEVNULL
 import os
-import re
 import pwd
+import re
 
 class Util(Service):
     def subproc(self, command, real_user=None):
@@ -41,3 +42,13 @@ class Util(Service):
         chown_path = path.abspath(chown_path)
         user = self.get_real_user()
         self.subproc('chown -R ' + user + ':' + user + ' ' + chown_path)
+
+    def stamp_template(self, template_path, **kwargs):
+        template_path = path.abspath(template_path)
+        body = ''
+        with open(template_path, 'r') as f:
+            body = f.read()
+        template = Template(body)
+        body = template.render(**kwargs) + '\n'
+        with open(template_path, 'w') as f:
+            f.write(body)
