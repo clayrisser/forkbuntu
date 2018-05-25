@@ -8,17 +8,16 @@ import pwd
 class Util(Service):
     def subproc(self, command, real_user=None):
         log = self.app.log
+        if real_user:
+            user = self.get_real_user()
+            return self.subproc('sudo --preserve-env -u ' + user + ' ' + command)
         log.debug('command: ' + command)
         try:
-            stdout = ''
-            if real_user:
-                stdout = self.__demoted_subproc(command)
-            else:
-                stdout = check_output(
-                    command,
-                    stderr=STDOUT,
-                    shell=True
-                ).decode('utf-8')
+            stdout = check_output(
+                command,
+                stderr=STDOUT,
+                shell=True
+            ).decode('utf-8')
             log.debug(stdout)
             return stdout
         except CalledProcessError as err:
@@ -38,32 +37,7 @@ class Util(Service):
             user = matches[0]
         return user
 
-    def __demoted_subproc(self, command):
-        pargs = self.app.pargs
-        f = DEVNULL
-        if pargs.debug:
-            f = None
-        command = command.split()
+    def chown(self, chown_path):
+        chown_path = path.abspath(chown_path)
         user = self.get_real_user()
-        cwd = os.getcwd()
-        pw = pwd.getpwnam(user)
-        env = os.environ.copy()
-        env['HOME']  = pw.pw_dir
-        env['LOGNAME']  = pw.pw_name
-        env['PWD']  = cwd
-        env['USER']  = pw.pw_name
-        proc = Popen(
-            command,
-            preexec_fn=self.__demote(pw.pw_uid, pw.pw_gid),
-            cwd=cwd,
-            env=env,
-            stdout=f,
-            stderr=f
-        )
-        return proc.wait()
-
-    def __demote(self, uid, gid):
-        def result():
-            os.setgid(gid)
-            os.setuid(uid)
-        return result
+        self.subproc('chown -R ' + user + ':' + user + ' ' + chown_path)

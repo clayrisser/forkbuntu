@@ -39,6 +39,7 @@ App = create_app(
             'cwd': os.getcwd(),
             'filesystem': '.tmp/filesystem',
             'iso': 'ubuntu-18.04-server-amd64.iso',
+            'keyring': '.tmp/keyring',
             'mount': '.tmp/iso',
             'output': 'forkbuntu.iso',
             'src': path.dirname(path.realpath(__file__)),
