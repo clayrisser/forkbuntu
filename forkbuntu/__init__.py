@@ -1,11 +1,21 @@
-from . import controllers, services
+from . import controllers, services, steps
 from cfoundation import create_app
+from munch import munchify
 from os import path
 from pydash import _
 from tempfile import mkdtemp
 import os
+import re
 import yaml
-from munch import munchify
+
+def get_steps(app):
+    context = Object()
+    for key in dir(steps):
+        matches = re.findall(r'[A-Z].*', key)
+        if len(matches) > 0:
+            name = _.snake_case(key)
+            setattr(context, name, getattr(steps, key)(name, app))
+    return context
 
 def load_conf(conf):
     with open(path.abspath('config.yml'), 'r') as f:
@@ -38,6 +48,7 @@ App = create_app(
         'paths': {
             'apt_ftparchive': '.tmp/apt-ftparchive',
             'cwd': os.getcwd(),
+            'cwt': '.tmp',
             'filesystem': '.tmp/filesystem',
             'indices': '.tmp/indices',
             'iso': 'ubuntu-18.04-server-amd64.iso',
@@ -49,3 +60,6 @@ App = create_app(
         }
     })
 )
+
+class Object():
+    pass

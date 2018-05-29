@@ -1,3 +1,4 @@
+from .cache import Cache
 from .clean import Clean
 from .configure import Configure
 from .extras import Extras
