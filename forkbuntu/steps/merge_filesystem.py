@@ -4,9 +4,9 @@ from os import path
 
 class MergeFilesystem(Step):
     messages = munchify({
+        'cache': 'merge filesystem using cache',
         'past': 'merged filesystem',
-        'present': 'merging filesystem',
-        'cache': 'using merged filesystem cache'
+        'present': 'merging filesystem'
     })
     requires = [
         'unpack_filesystem',
@@ -17,7 +17,12 @@ class MergeFilesystem(Step):
     def __init__(self, name, app):
         super().__init__(name, app)
         c = app.conf
-        self.checksum_paths = [path.join(c.paths.iso)]
+        self.checksum_paths = [
+            c.paths.iso,
+            path.join(c.paths.cwd, 'config.yml'),
+            path.join(c.paths.cwd, 'filesystem'),
+            path.join(c.paths.cwd, 'scripts')
+        ]
 
     def run(self):
         s = self.app.services

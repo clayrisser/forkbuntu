@@ -4,9 +4,9 @@ from os import path
 
 class BuildKeyring(Step):
     messages = munchify({
+        'cache': 'build keyring using cache',
         'past': 'built keyring',
-        'present': 'building keyring',
-        'cache': 'using built keyring cache'
+        'present': 'building keyring'
     })
     requires = [
         'merge_filesystem'
@@ -15,7 +15,14 @@ class BuildKeyring(Step):
     def __init__(self, name, app):
         super().__init__(name, app)
         c = app.conf
-        self.checksum_paths = [path.join(c.paths.iso)]
+        self.checksum_paths = [
+            c.paths.iso,
+            path.join(c.paths.cwd, 'config.yml'),
+            path.join(c.paths.cwd, 'filesystem'),
+            path.join(c.paths.cwd, 'scripts'),
+            path.join(c.paths.mount, 'keyring'),
+            path.join(path.expanduser('~'), '.gnupg/pubring.kbx')
+        ]
 
     def run(self):
         s = self.app.services

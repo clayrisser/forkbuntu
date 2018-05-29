@@ -1,4 +1,5 @@
 from cfoundation import Service
+from os import path
 import shutil
 
 class Clean(Service):
@@ -6,5 +7,6 @@ class Clean(Service):
         c = self.app.conf
         shutil.rmtree(c.paths.tmp)
 
-    def nuke(self):
+    def cache(self):
+        c = self.app.conf
         shutil.rmtree(path.join(c.paths.cwd, '.tmp'))

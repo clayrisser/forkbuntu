@@ -5,9 +5,9 @@ from os import path
 
 class UnpackFilesystem(Step):
     messages = munchify({
+        'cache': 'unpack filesystem using cache',
         'past': 'unpacked filesystem',
-        'present': 'unpacking filesystem',
-        'cache': 'using filesystem cache'
+        'present': 'unpacking filesystem'
     })
     requires = [
         'unpack_iso'
@@ -17,10 +17,10 @@ class UnpackFilesystem(Step):
         super().__init__(name, app)
         c = app.conf
         self.checksum_paths = [
+            c.paths.iso,
             path.join(c.paths.cwd, 'config.yml'),
             path.join(c.paths.cwd, 'filesystem'),
-            path.join(c.paths.cwd, 'iso'),
-            path.join(path.join(c.paths.mount, 'install/filesystem.squashfs'))
+            path.join(c.paths.cwd, 'scripts')
         ]
 
     def run(self):

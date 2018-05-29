@@ -9,6 +9,7 @@ class Unpack(Service):
     def iso(self):
         log = self.app.log
         c = self.app.conf
+        s = self.app.services
         tmp_mount_path = path.join(c.paths.tmp, 'iso')
         log.debug('temporary mount path: ' + tmp_mount_path)
         if path.isdir(tmp_mount_path):
@@ -18,13 +19,12 @@ class Unpack(Service):
             shutil.rmtree(c.paths.mount)
         self.__mount_iso(c.paths.iso, tmp_mount_path)
         shutil.copytree(tmp_mount_path, c.paths.mount, ignore=shutil.ignore_patterns('ubuntu'))
-        command = 'umount ' + tmp_mount_path
-        log.debug('command: ' + command)
-        stdout = check_output(command, shell=True).decode('utf-8')
-        log.debug(stdout)
+        s.util.chown(c.paths.mount)
+        s.util.subproc('umount ' + tmp_mount_path, sudo=True)
 
     def __mount_iso(self, iso_path, mount_path):
         log = self.app.log
+        s = self.app.services
         try:
             command = 'mount -o loop ' + iso_path + ' ' + mount_path
             log.debug('command: ' + command)
@@ -41,25 +41,21 @@ class Unpack(Service):
                 groups = match.groups()
                 if len(groups) >= 2:
                     mounted = match.groups()[1]
-                    command = 'umount ' + mounted
-                    log.debug('command: ' + command)
-                    stdout = check_output(command, shell=True).decode('utf-8')
-                    log.debug(stdout)
+                    s.util.subproc('umount ' + mounted, sudo=True)
                     return self.__mount_iso(iso_path, mount_path)
             raise err
 
     def filesystem(self):
         log = self.app.log
         c = self.app.conf
+        s = self.app.services
         filesystem_parent_path = path.abspath(path.join(c.paths.filesystem, '..'))
         if path.isdir(path.join(filesystem_parent_path, 'squashfs-root')):
             shutil.rmtree(path.join(filesystem_parent_path, 'squashfs-root'))
         if path.isdir(c.paths.filesystem):
             shutil.rmtree(c.paths.filesystem)
         os.chdir(filesystem_parent_path)
-        command = 'unsquashfs ' + path.join(c.paths.install, 'filesystem.squashfs')
-        log.debug('command: ' + command)
-        stdout = check_output(command, shell=True).decode('utf-8')
-        log.debug(stdout)
+        s.util.subproc('unsquashfs ' + path.join(c.paths.install, 'filesystem.squashfs'), sudo=True)
         os.chdir(c.paths.cwd)
         os.rename(path.join(filesystem_parent_path, 'squashfs-root'), c.paths.filesystem)
+        s.util.chown(c.paths.filesystem)

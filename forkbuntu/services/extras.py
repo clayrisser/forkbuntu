@@ -1,9 +1,9 @@
 from cfoundation import Service
 from distutils.dir_util import copy_tree
+from glob import glob
 from os import path
 import os
 import shutil
-from glob import glob
 
 class Extras(Service):
     def create(self):
@@ -35,9 +35,8 @@ class Extras(Service):
         ]
         for suffix in suffixes:
             filename = 'override.' + c.codename + '.' + suffix
-            s.util.subproc(
-                'curl -L -o ' + path.join(c.paths.indices, filename) + ' ' + repo + ('/' + filename).replace('//', '')
-            )
+            s.util.download(repo + ('/' + filename).replace('//', ''), path.join(c.paths.indices, filename))
+        s.util.chown(c.paths.indices)
 
     def __generate_apt_ftparchive(self):
         s = self.app.services
@@ -55,3 +54,4 @@ class Extras(Service):
                 paths=c.paths,
                 version=c.version
             )
+        s.util.chown(c.paths.apt_ftparchive)

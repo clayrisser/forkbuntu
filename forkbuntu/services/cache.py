@@ -18,13 +18,16 @@ class Cache(Service):
 
     def register(self, key):
         c = self.app.conf
+        s = self.app.services
         step = getattr(self.app.steps, key)
         cache = self.get()
         cache[key] = []
         for checksum_path in step.checksum_paths:
             cache[key].append(self.checksum(checksum_path))
-        with open(path.join(c.paths.cwt, '.cache.yml'), 'w') as f:
+        cache_path = path.join(c.paths.cwt, '.cache.yml')
+        with open(cache_path, 'w') as f:
             yaml.dump(unmunchify(cache), f, default_flow_style=False)
+        s.util.chown(cache_path)
         return cache
 
     def get(self, key=None):

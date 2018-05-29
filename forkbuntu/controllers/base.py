@@ -12,6 +12,9 @@ class Base(Controller):
 
     @expose()
     def default(self):
+        c = self.app.conf
+        spinner = self.app.spinner
         steps = self.app.steps
+        steps.pack_iso.start()
         steps.clean.start()
         spinner.start('iso created: ' + c.paths.output).succeed()

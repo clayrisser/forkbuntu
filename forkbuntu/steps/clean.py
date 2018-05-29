@@ -8,9 +8,12 @@ class Clean(Step):
         'present': 'cleaning'
     })
     requires = [
-        'pack_iso'
+        'initialize'
     ]
 
     def run(self):
+        pargs = self.app.pargs
         s = self.app.services
         s.clean.tmp()
+        if pargs.cache:
+            s.clean.cache()

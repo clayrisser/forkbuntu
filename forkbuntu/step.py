@@ -24,7 +24,8 @@ class Step():
             return False
         for checksum_path in self.checksum_paths:
             checksum = s.cache.checksum(checksum_path)
-            if not _.includes(s.cache.get(self.name), checksum):
+            cached_checksums = s.cache.get(self.name)
+            if not _.includes(cached_checksums, checksum):
                 return False
         return True
 

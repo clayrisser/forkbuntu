@@ -27,6 +27,7 @@ class Configure(Service):
             os.makedirs(path.join(c.paths.mount, 'pool/extras'))
         if path.isdir(path.join(c.paths.cwd, 'iso')):
             copy_tree(path.join(c.paths.cwd, 'iso'), c.paths.mount)
+        s.util.chown(c.paths.mount)
 
     def load_release(self):
         c = self.app.conf
@@ -57,6 +58,7 @@ class Configure(Service):
         )
         if path.isdir(path.join(c.paths.cwd, 'filesystem')):
             copy_tree(path.join(c.paths.cwd, 'filesystem'), c.paths.filesystem)
+        s.util.chown(c.paths.filesystem)
 
     def sign_iso(self):
         c = self.app.conf

@@ -1,23 +1,18 @@
 from cfoundation import Service
-from getpass import getuser
 from munch import munchify, Munch
 from os import path
 from pydash import _
-from subprocess import Popen
-from time import sleep
-from time import sleep
+from subprocess import check_output, CalledProcessError, STDOUT
 import glob
-import grp
 import json
 import os
-import pwd
-import shutil
 import re
+import shutil
 
 class GPG(Service):
     ubuntu_keys = ['FBB75451', '437D05B5', 'C0B21F32', 'EFE21092']
 
-    def restart(self):
+    def setup(self):
         s = self.app.services
         gpg_path = path.join(path.expanduser('~'), '.gnupg')
         private_keys_path = path.join(gpg_path, 'private-keys-v1.d')
@@ -30,14 +25,35 @@ class GPG(Service):
         return _.filter(all_gpg_keys, lambda key: _.includes(self.ubuntu_keys, key.pub.key.short))
 
     def build_keyring(self):
-        s = self.app.services
         c = self.app.conf
+        log = self.app.log
+        pargs = self.app.pargs
+        s = self.app.services
+        spinner = self.app.spinner
         if path.isdir(c.paths.keyring):
             shutil.rmtree(c.paths.keyring)
         os.makedirs(c.paths.keyring)
         s.util.chown(c.paths.keyring)
         os.chdir(c.paths.keyring)
-        s.util.subproc('apt-get source ubuntu-keyring', real_user=True)
+        try:
+            command = 'apt-get source ubuntu-keyring'
+            log.debug('command: ' + command)
+            stdout = check_output(
+                command,
+                stderr=STDOUT,
+                shell=True
+            ).decode('utf-8')
+            log.debug(stdout)
+            self.chown(c.paths.keyring)
+        except CalledProcessError as err:
+            matches = re.findall(r'Temporary\sfailure\sresolving', err.output.decode('utf-8'))
+            if len(matches) > 0:
+                spinner.fail('no internet connection')
+            if pargs.debug:
+                if err.output:
+                    log.error(err.output.decode('utf-8'))
+                raise err
+            exit(1)
         ubuntu_keyring_path = _.filter(os.listdir(c.paths.keyring), os.path.isdir)
         if len(ubuntu_keyring_path) > 0:
             ubuntu_keyring_path = path.join(c.paths.keyring, ubuntu_keyring_path[0])
@@ -45,7 +61,7 @@ class GPG(Service):
             raise Exception('failed to source ubuntu-keyring')
         keyrings_path = path.join(ubuntu_keyring_path, 'keyrings')
         os.chdir(keyrings_path)
-        s.util.subproc('gpg --import < ' + path.join(keyrings_path, 'ubuntu-archive-keyring.gpg'), real_user=True)
+        s.util.subproc('gpg --import < ' + path.join(keyrings_path, 'ubuntu-archive-keyring.gpg'))
         ubuntu_keys = self.get_ubuntu_keys()
         gpg_key = None
         if len(self.app.gpg_keys) == 1:
@@ -56,8 +72,7 @@ class GPG(Service):
             raise Exception('failed to find gpg key')
         s.util.subproc(
             'gpg --export ' + ' '.join(self.ubuntu_keys) + ' '
-            + gpg_key.pub.key.short + ' > ' + path.join(keyrings_path, 'ubuntu-archive-keyring.gpg'),
-            real_user=True
+            + gpg_key.pub.key.short + ' > ' + path.join(keyrings_path, 'ubuntu-archive-keyring.gpg')
         )
         os.chdir(ubuntu_keyring_path)
         stdout = s.util.subproc('cat ' + path.join(keyrings_path, 'ubuntu-archive-keyring.gpg') + ' | sha512sum')
@@ -72,7 +87,7 @@ class GPG(Service):
         self.app.spinner.stop()
         s.util.subproc(
             'dpkg-buildpackage -rfakeroot -m"' + gpg_key.name + ' <' + gpg_key.email + '>" -k'
-            + gpg_key.pub.key.short, real_user=True
+            + gpg_key.pub.key.short
         )
         self.app.spinner.start()
         keyring_deb_path = _.filter(os.listdir(c.paths.keyring), lambda x: x[len(x) - 4:] == '.deb')
@@ -97,7 +112,7 @@ class GPG(Service):
         s = self.app.services
         self.__chmod_gpg()
         s.util.subproc('rngd -r /dev/urandom')
-        s.util.subproc('gpg --gen-key', real_user=True)
+        s.util.subproc('gpg --gen-key')
 
     def get_keys(self, include_ubuntu_keys=False, trying_again=False):
         s = self.app.services

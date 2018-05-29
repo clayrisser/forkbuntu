@@ -1,6 +1,5 @@
 from ..step import Step
 from munch import munchify
-from time import sleep
 import json
 
 class Initialize(Step):
@@ -12,6 +11,7 @@ class Initialize(Step):
     def run(self):
         s = self.app.services
         s.setup.init()
+        s.gpg.setup()
         setattr(self.app, 'gpg_keys', s.gpg.get_keys())
         gpg_keys = self.app.gpg_keys
 
