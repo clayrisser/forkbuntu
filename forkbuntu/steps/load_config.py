@@ -10,6 +10,7 @@ class LoadConfig(Step):
         'past': 'loaded config',
         'present': 'loading config'
     })
+    cache = False
     requires = [
         'unpack_filesystem'
     ]
@@ -39,7 +40,8 @@ class LoadConfig(Step):
             'hostname': c.hostname if 'hostname' in c else _.snake_case(c.name)
         }))
 
-    def finish(self):
-        super().finish()
+    def finish(self, status):
+        result = super().finish(status)
         log = self.app.log
         log.debug('conf: ' + json.dumps(self.app.conf, indent=4, sort_keys=True))
+        return result

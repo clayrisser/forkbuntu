@@ -3,6 +3,7 @@ from munch import munchify
 from os import path
 
 class CreateExtras(Step):
+    agnostic = True
     messages = munchify({
         'cache': 'create extras using cache',
         'past': 'created extras',
@@ -17,10 +18,7 @@ class CreateExtras(Step):
         c = app.conf
         self.checksum_paths = [
             c.paths.apt_ftparchive,
-            c.paths.indices,
-            c.paths.iso,
-            path.join(c.paths.cwd, 'config.yml'),
-            path.join(c.paths.cwd, 'iso')
+            c.paths.indices
         ]
 
     def run(self):

@@ -11,4 +11,3 @@ class Setup(Service):
             exit(1)
         if not path.isdir(c.paths.cwt):
             os.makedirs(c.paths.cwt)
-            s.util.chown(c.paths.cwt)

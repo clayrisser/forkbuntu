@@ -44,7 +44,7 @@ class GPG(Service):
                 shell=True
             ).decode('utf-8')
             log.debug(stdout)
-            self.chown(c.paths.keyring)
+            s.util.chown(c.paths.keyring)
         except CalledProcessError as err:
             matches = re.findall(r'Temporary\sfailure\sresolving', err.output.decode('utf-8'))
             if len(matches) > 0:

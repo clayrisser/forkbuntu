@@ -7,13 +7,11 @@ class Clean(Step):
         'past': 'cleaned',
         'present': 'cleaning'
     })
+    cache = False
     requires = [
         'initialize'
     ]
 
     def run(self):
-        pargs = self.app.pargs
         s = self.app.services
         s.clean.tmp()
-        if pargs.cache:
-            s.clean.cache()

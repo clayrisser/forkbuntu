@@ -3,24 +3,22 @@ from munch import munchify
 from os import path
 
 class BuildKeyring(Step):
+    agnostic = True
     messages = munchify({
         'cache': 'build keyring using cache',
         'past': 'built keyring',
         'present': 'building keyring'
     })
     requires = [
-        'merge_filesystem'
+        'merge_filesystem',
+        'merge_iso'
     ]
 
     def __init__(self, name, app):
         super().__init__(name, app)
         c = app.conf
         self.checksum_paths = [
-            c.paths.iso,
-            path.join(c.paths.cwd, 'config.yml'),
-            path.join(c.paths.cwd, 'filesystem'),
-            path.join(c.paths.cwd, 'scripts'),
-            path.join(c.paths.mount, 'keyring'),
+            c.paths.keyring,
             path.join(path.expanduser('~'), '.gnupg/pubring.kbx')
         ]
 
