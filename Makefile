@@ -46,6 +46,6 @@ publish: dist
 
 .PHONY: clean
 clean:
-	@cd example && ../env/bin/python3 ../forkbuntu clean --cache
-	-@rm -rf */__pycache__ */*/__pycache__ README.rst dist *.egg-info >/dev/null || true
+	-@rm -rf */__pycache__ */*/__pycache__ README.rst dist \
+		example/.tmp *.egg-info >/dev/null || true
 	@echo ::: CLEAN :::

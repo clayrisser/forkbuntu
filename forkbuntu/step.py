@@ -1,5 +1,6 @@
-from pydash import _
 from munch import Munch
+from os import path
+from pydash import _
 
 steps_run = Munch()
 
@@ -29,16 +30,27 @@ class Step():
                 cached = maybe_cached
         return cached
 
-    def checksum(self):
+    def is_cached(self, cached):
         s = self.app.services
-        if not hasattr(self, 'checksum_paths'):
-            return True
-        for checksum_path in self.checksum_paths:
+        spinner = self.app.spinner
+        if not hasattr(self, 'checksum_paths') and not hasattr(self, 'has_paths'):
+            return cached
+        if not cached and (not hasattr(self, 'root') or not self.root):
+            return cached
+        cached = True
+        checksum_paths = self.checksum_paths if hasattr(self, 'checksum_paths') else []
+        has_paths = self.has_paths if hasattr(self, 'has_paths') else []
+        for checksum_path in checksum_paths:
             checksum = s.cache.checksum(checksum_path)
             cached_checksums = s.cache.get(self.name)
             if not _.includes(cached_checksums, checksum):
-                return False
-        return True
+                cached = False
+                break
+        for has_path in has_paths:
+            if not path.exists(has_path):
+                cached = False
+                break
+        return cached
 
     def register(self):
         s = self.app.services
@@ -50,8 +62,7 @@ class Step():
         cached = self.run_required()
         origional_cached = cached
         spinner.start(self.messages.present)
-        if hasattr(self, 'checksum_paths'):
-            cached = self.checksum()
+        cached = self.is_cached(cached)
         if cached:
             if hasattr(self, 'agnostic') and self.agnostic:
                 cached = origional_cached

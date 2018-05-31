@@ -110,9 +110,12 @@ class GPG(Service):
 
     def gen_key(self):
         s = self.app.services
+        spinner = self.app.spinner
         self.__chmod_gpg()
-        s.util.subproc('rngd -r /dev/urandom')
+        s.util.subproc('rngd -r /dev/urandom', sudo=True)
+        spinner.stop()
         s.util.subproc('gpg --gen-key')
+        spinner.start()
 
     def get_keys(self, include_ubuntu_keys=False, trying_again=False):
         s = self.app.services
@@ -174,5 +177,5 @@ class GPG(Service):
         user = s.util.get_real_user()
         gpg_path = path.join(path.expanduser('~'), '.gnupg')
         s.util.chown(gpg_path)
-        s.util.subproc('chmod 700 ' + gpg_path)
-        s.util.subproc('find ' + gpg_path + ' -type f -exec chmod 600 {} \;')
+        s.util.subproc('chmod 700 ' + gpg_path, sudo=True)
+        s.util.subproc('find ' + gpg_path + ' -type f -exec chmod 600 {} \;', sudo=True)

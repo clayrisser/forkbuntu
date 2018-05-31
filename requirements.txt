@@ -2,6 +2,7 @@ backports.shutil-get-terminal-size==1.0.0
 cement==2.10.12
 cfoundation==0.2.1
 checksum==1.0.2
+checksumdir==1.1.4
 colorama==0.3.9
 cursor==1.2.0
 enum34==1.1.6

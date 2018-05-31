@@ -3,6 +3,7 @@ from munch import munchify
 import json
 
 class Initialize(Step):
+    cache = False
     messages = munchify({
         'past': 'initialized',
         'present': 'initializing'
