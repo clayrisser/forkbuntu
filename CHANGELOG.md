@@ -7,12 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.2.1] - 2018-05-31
 ### Added
-- Add caching
+- Caching
 
 ## [0.2.0] - 2018-05-25
 ### Added
-- Build keyring
-- Add package extras
+- Keyring builder
+- Package extras
 
 ## [0.1.0] - 2018-05-24
 ### Added

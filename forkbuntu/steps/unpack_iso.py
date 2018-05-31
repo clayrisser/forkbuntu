@@ -21,6 +21,7 @@ class UnpackIso(Step):
         self.checksum_paths = [
             c.paths.iso,
             path.join(c.paths.cwd, 'config.yml'),
+            path.join(c.paths.cwd, 'extras'),
             path.join(c.paths.cwd, 'filesystem'),
             path.join(c.paths.cwd, 'iso'),
             path.join(c.paths.cwd, 'scripts')

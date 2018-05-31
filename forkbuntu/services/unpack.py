@@ -19,7 +19,6 @@ class Unpack(Service):
             shutil.rmtree(c.paths.mount)
         self.__mount_iso(c.paths.iso, tmp_mount_path)
         shutil.copytree(tmp_mount_path, c.paths.mount, ignore=shutil.ignore_patterns('ubuntu'))
-        s.util.chown(c.paths.mount)
         s.util.subproc('umount ' + tmp_mount_path, sudo=True)
 
     def __mount_iso(self, iso_path, mount_path):
@@ -58,4 +57,3 @@ class Unpack(Service):
         s.util.subproc('unsquashfs ' + path.join(c.paths.install, 'filesystem.squashfs'), sudo=True)
         os.chdir(c.paths.cwd)
         os.rename(path.join(filesystem_parent_path, 'squashfs-root'), c.paths.filesystem)
-        s.util.chown(c.paths.filesystem)

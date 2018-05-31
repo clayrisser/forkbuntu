@@ -42,9 +42,10 @@ class Util(Service):
                 user = os.environ['USER']
         return user
 
-    def chown(self, chown_path):
+    def chown(self, chown_path, user=None):
         chown_path = path.abspath(chown_path)
-        user = self.get_real_user()
+        if not user:
+            user = self.get_real_user()
         self.subproc('chown -R ' + user + ':' + user + ' ' + chown_path, sudo=True)
 
     def stamp_template(self, template_path, **kwargs):
