@@ -34,8 +34,7 @@ sudo pip3 install forkbuntu
 
 ```sh
 git clone https://github.com/codejamninja/forkbuntu.git
-cd forkbuntu/example
-sudo forkbuntu
+sudo forkbuntu -s example
 ```
 
 
