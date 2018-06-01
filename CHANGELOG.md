@@ -5,19 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2018-06-01
+### Added
+* caching
+* custom preseed
+* preseed merge
+### Fixed
+* chown bugs
+* postinstall script
+
+
 ## [0.2.1] - 2018-05-31
 ### Added
-- Caching
+* caching
 
 ## [0.2.0] - 2018-05-25
 ### Added
-- Keyring builder
-- Package extras
+* keyring builder
+* package extras
 
 ## [0.1.0] - 2018-05-24
 ### Added
-- Beta release
+* beta release
 
 ## [0.0.1] - 2018-05-30
 ### Added
-- Initial commit
+* initial commit

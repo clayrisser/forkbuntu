@@ -30,8 +30,8 @@ d-i pkgsel/include string \
 {% endfor %}
 {% endif %}# Post install
 d-i preseed/late_command string \
-    rsync /cdrom/scripts /target/root --chmod=ugo+rwx
-    # chroot /target bash /root/scripts/run_postinstall.sh
+    cp -r /cdrom/scripts /target/root && \
+    chroot /target bash /root/scripts/run_postinstall.sh
 
 # Network configuration
 d-i netcfg/get_hostname string {{ hostname }}
