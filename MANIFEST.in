@@ -1,3 +1,6 @@
 include forkbuntu/logger.yml
+include forkbuntu/preseed.seed
+recursive-include forkbuntu/apt-ftparchive *
 recursive-include forkbuntu/filesystem *
 recursive-include forkbuntu/iso *
+recursive-include forkbuntu/isolinux *

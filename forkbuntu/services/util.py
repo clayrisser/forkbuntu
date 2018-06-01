@@ -33,8 +33,8 @@ class Util(Service):
             exit(1)
 
     def get_real_user(self):
-        user = os.environ['SUDO_USER']
-        if not user:
+        user = os.environ['SUDO_USER'] if 'SUDO_USER' in os.environ else None
+        if not user or len(user) <= 0:
             matches = re.findall(r'[^\/]+$', path.expanduser('~'))
             if len(matches) > 0:
                 user = matches[0]

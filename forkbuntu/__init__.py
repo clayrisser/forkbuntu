@@ -4,6 +4,7 @@ from munch import munchify
 from os import path
 from pydash import _
 from tempfile import mkdtemp
+from halo import Halo
 import os
 import re
 import yaml
@@ -18,6 +19,9 @@ def get_steps(app):
     return context
 
 def load_conf(conf):
+    if not path.exists(path.abspath('config.yml')):
+        Halo(text='config.yml not found').fail()
+        exit(1)
     with open(path.abspath('config.yml'), 'r') as f:
         try:
             conf = munchify(_.merge({}, conf, yaml.load(f)))
