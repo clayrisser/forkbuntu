@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.2.7] - 2018-06-01
 ### Fixed
+* hostname bug
+
+## [0.2.7] - 2018-06-01
+### Fixed
 * packaging bugs
 
 ## [0.2.4] - 2018-06-01

@@ -37,7 +37,7 @@ class LoadConfig(Step):
             preseed = preseed + '.seed'
         self.app.conf = munchify(_.merge({}, self.app.conf, {
             'description': c.description if 'description' in c else c.name + ' ' + c.version,
-            'hostname': c.hostname if 'hostname' in c else _.snake_case(c.name),
+            'hostname': c.hostname if 'hostname' in c else _.snake_case(c.name).replace('_', '-'),
             'preseed': preseed
         }))
 
