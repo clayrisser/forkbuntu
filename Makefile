@@ -46,6 +46,6 @@ publish: dist
 
 .PHONY: clean
 clean:
-	-@rm -rf */__pycache__ */*/__pycache__ README.rst dist \
+	-@rm -rf */__pycache__ */*/__pycache__ README.rst dist build \
 		example/.tmp *.egg-info >/dev/null || true
 	@echo ::: CLEAN :::
