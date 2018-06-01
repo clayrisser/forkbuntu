@@ -4,6 +4,7 @@ from os import path
 from pydash import _
 from subprocess import check_output, CalledProcessError, STDOUT
 import glob
+import inquirer
 import json
 import os
 import re
@@ -58,13 +59,7 @@ class GPG(Service):
         keyrings_path = path.join(ubuntu_keyring_path, 'keyrings')
         os.chdir(keyrings_path)
         s.util.subproc('gpg --import < ' + path.join(keyrings_path, 'ubuntu-archive-keyring.gpg'))
-        gpg_key = None
-        if len(self.app.gpg_keys) == 1:
-            gpg_key = self.app.gpg_keys[0]
-        elif len(self.app.gpg_keys) > 1:
-            gpg_key = self.app.gpg_keys[0]
-        if not gpg_key:
-            raise Exception('failed to find gpg key')
+        gpg_key = self.get_key()
         s.util.subproc(
             'gpg --export ' + ' '.join(self.ubuntu_keys) + ' '
             + gpg_key.pub.key.short + ' > ' + path.join(keyrings_path, 'ubuntu-archive-keyring.gpg')
@@ -166,6 +161,28 @@ class GPG(Service):
             self.gen_key()
             return self.get_keys(trying_again=True)
         return keys
+
+    def get_key(self):
+        c = self.app.conf
+        spinner = self.app.spinner
+        gpg_keys = self.app.gpg_keys
+        gpg_key = None
+        if len(gpg_keys) == 1:
+            gpg_key = gpg_keys[0]
+        elif len(gpg_keys) > 1:
+            spinner.stop()
+            answer = munchify(inquirer.prompt([
+                inquirer.List(
+                    'gpg_key',
+                    message='choose a gpg key',
+                    choices=_.map(gpg_keys, lambda x: x.pub.key.short + ': ' + x.name + ' <' + x.email + '>')
+                )
+            ])).gpg_key
+            spinner.start()
+            gpg_key = _.find(gpg_keys, lambda x: x.pub.key.short == answer[:answer.index(':')])
+        if not gpg_key:
+            raise Exception('failed to find gpg key')
+        return gpg_key
 
     def __chmod_gpg(self):
         s = self.app.services
