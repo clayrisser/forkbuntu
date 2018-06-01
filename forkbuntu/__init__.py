@@ -58,6 +58,7 @@ App = create_app(
             'indices': '.tmp/indices',
             'iso': 'ubuntu-18.04-server-amd64.iso',
             'keyring': '.tmp/keyring',
+            'initrd': '.tmp/initrd',
             'mount': '.tmp/iso',
             'output': 'forkbuntu.iso',
             'src': path.dirname(path.realpath(__file__)),

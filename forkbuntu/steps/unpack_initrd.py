@@ -2,13 +2,13 @@ from ..step import Step
 from munch import munchify
 from os import path
 
-class UnpackFilesystem(Step):
+class UnpackInitrd(Step):
     messages = munchify({
-        'past': 'unpacked filesystem',
-        'present': 'unpacking filesystem'
+        'past': 'unpacked initrd',
+        'present': 'unpacking initrd'
     })
     requires = ['unpack_iso']
 
     def run(self):
         s = self.app.services
-        s.unpack.filesystem()
+        s.initrd.unpack()

@@ -8,9 +8,7 @@ class CreateExtras(Step):
         'past': 'created extras',
         'present': 'creating extras',
     })
-    requires = [
-        'build_keyring'
-    ]
+    requires = ['build_keyring']
 
     def __init__(self, name, app):
         super().__init__(name, app)

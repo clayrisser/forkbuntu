@@ -7,9 +7,7 @@ class PackFilesystem(Step):
         'past': 'packed filesystem',
         'present': 'packing filesystem'
     })
-    requires = [
-        'configure_filesystem'
-    ]
+    requires = ['configure_filesystem']
 
     def run(self):
         s = self.app.services

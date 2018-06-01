@@ -1,14 +1,16 @@
 from cfoundation import Service
+from hashlib import md5
 from munch import munchify, Munch, unmunchify
 from os import path
 import checksum
 import checksumdir
 import hashlib
+import os
 import yaml
 
 class Cache(Service):
     def checksum(self, checksum_path):
-        value = None
+        value = md5(checksum_path.encode()).hexdigest()
         if path.exists(checksum_path):
             if path.isdir(checksum_path):
                 value = checksumdir.dirhash(checksum_path)
@@ -69,6 +71,8 @@ class Cache(Service):
         c = self.app.conf
         s = self.app.services
         cache_path = path.join(c.paths.cwt, '.cache.yml')
+        if not path.isdir(c.paths.cwt):
+            os.makedirs(c.paths.cwt)
         with open(cache_path, 'w') as f:
             yaml.dump(unmunchify(cache), f, default_flow_style=False)
         s.util.chown(cache_path)

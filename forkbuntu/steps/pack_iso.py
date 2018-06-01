@@ -7,9 +7,7 @@ class PackIso(Step):
         'past': 'packed iso',
         'present': 'packing iso'
     })
-    requires = [
-        'sign_iso'
-    ]
+    requires = ['sign_iso']
 
     def run(self):
         s = self.app.services

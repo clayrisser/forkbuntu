@@ -2,14 +2,13 @@ from ..step import Step
 from munch import munchify
 from os import path
 
-class Clean(Step):
+class MergeInitrd(Step):
     messages = munchify({
-        'past': 'cleaned',
-        'present': 'cleaning'
+        'past': 'merged initrd',
+        'present': 'merging initrd'
     })
-    cache = False
-    requires = ['initialize']
+    requires = ['unpack_initrd']
 
     def run(self):
         s = self.app.services
-        s.clean.tmp()
+        s.initrd.merge()

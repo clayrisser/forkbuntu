@@ -21,7 +21,7 @@ with open(path.join(here, 'requirements.txt'), 'r', encoding='utf-8') as f:
 setup(
     name='forkbuntu',
 
-    version='0.2.2',
+    version='0.2.3',
 
     description='Easily create your own ubuntu distribution and install cd',
 

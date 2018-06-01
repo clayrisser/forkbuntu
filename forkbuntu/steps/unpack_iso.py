@@ -1,5 +1,4 @@
 from ..step import Step
-from time import sleep
 from munch import munchify
 from os import path
 
@@ -8,9 +7,7 @@ class UnpackIso(Step):
         'past': 'unpacked iso',
         'present': 'unpacking iso'
     })
-    requires = [
-        'initialize'
-    ]
+    requires = ['initialize']
     root = True
 
     def __init__(self, name, app):
@@ -23,8 +20,9 @@ class UnpackIso(Step):
             path.join(c.paths.cwd, 'config.yml'),
             path.join(c.paths.cwd, 'extras'),
             path.join(c.paths.cwd, 'filesystem'),
+            path.join(c.paths.cwd, 'initrd'),
             path.join(c.paths.cwd, 'iso'),
-            path.join(c.paths.cwd, 'scripts')
+            path.join(c.paths.cwd, 'scripts'),
         ]
 
     def run(self):

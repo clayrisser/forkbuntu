@@ -1,5 +1,4 @@
 from ..step import Step
-from time import sleep
 from munch import munchify
 from os import path
 import json
@@ -11,9 +10,7 @@ class LoadConfig(Step):
         'present': 'loading config'
     })
     cache = False
-    requires = [
-        'unpack_filesystem'
-    ]
+    requires = ['unpack_filesystem']
 
     def __init__(self, name, app):
         super().__init__(name, app)

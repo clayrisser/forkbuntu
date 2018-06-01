@@ -7,9 +7,7 @@ class ConfigureFilesystem(Step):
         'past': 'configured filesystem',
         'present': 'configuring filesystem'
     })
-    requires = [
-        'merge_filesystem'
-    ]
+    requires = ['merge_filesystem']
 
     def run(self):
         s = self.app.services

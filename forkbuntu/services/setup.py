@@ -9,5 +9,3 @@ class Setup(Service):
         if os.geteuid() != 0:
             self.app.spinner.fail('please run as root')
             exit(1)
-        if not path.isdir(c.paths.cwt):
-            os.makedirs(c.paths.cwt)

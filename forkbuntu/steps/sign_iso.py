@@ -12,6 +12,12 @@ class SignIso(Step):
         'pack_filesystem'
     ]
 
+    def __init__(self, name, app):
+        super().__init__(name, app)
+        c = app.conf
+        if path.exists(path.join(c.paths.cwd, 'initrd')):
+            self.requires.append('pack_initrd')
+
     def run(self):
         s = self.app.services
         s.configure.sign_iso()

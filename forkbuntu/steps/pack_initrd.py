@@ -2,14 +2,13 @@ from ..step import Step
 from munch import munchify
 from os import path
 
-class Clean(Step):
+class PackInitrd(Step):
     messages = munchify({
-        'past': 'cleaned',
-        'present': 'cleaning'
+        'past': 'packed initrd',
+        'present': 'packing initrd'
     })
-    cache = False
-    requires = ['initialize']
+    requires = ['merge_initrd']
 
     def run(self):
         s = self.app.services
-        s.clean.tmp()
+        s.initrd.pack()
