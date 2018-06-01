@@ -35,9 +35,13 @@ class LoadConfig(Step):
             'name': c.name if 'name' in c else release.distrib_name,
             'version': c.version if 'version' in c else release.distrib_version
         }))
+        preseed = c.preseed if ('preseed' in c and c.preseed != True) else _.snake_case(c.name)
+        if _.is_string(preseed) and preseed[len(preseed) - 5:] != '.seed':
+            preseed = preseed + '.seed'
         self.app.conf = munchify(_.merge({}, self.app.conf, {
             'description': c.description if 'description' in c else c.name + ' ' + c.version,
-            'hostname': c.hostname if 'hostname' in c else _.snake_case(c.name)
+            'hostname': c.hostname if 'hostname' in c else _.snake_case(c.name),
+            'preseed': preseed
         }))
 
     def finish(self, status):

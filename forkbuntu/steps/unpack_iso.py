@@ -20,6 +20,7 @@ class UnpackIso(Step):
         self.has_paths = [c.paths.output]
         self.checksum_paths = [
             c.paths.iso,
+            c.paths.src,
             path.join(c.paths.cwd, 'config.yml'),
             path.join(c.paths.cwd, 'extras'),
             path.join(c.paths.cwd, 'filesystem'),

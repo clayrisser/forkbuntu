@@ -12,14 +12,8 @@ class Configure(Service):
         s = self.app.services
         if path.isdir(path.join(c.paths.src, 'iso')):
             copy_tree(path.join(c.paths.src, 'iso'), c.paths.mount)
-        s.util.stamp_template(
-            path.join(c.paths.mount, 'preseed', 'forkbuntu.seed'),
-            hostname=c.hostname,
-            packages=c.packages
-        )
         s.util.stamp_template(path.join(c.paths.mount, '.disk', 'info'), description=c.description)
         s.util.stamp_template(path.join(c.paths.mount, 'README.diskdefines'), description=c.description)
-        s.util.stamp_template(path.join(c.paths.mount, 'isolinux/txt.cfg'), description=c.description)
         if path.isdir(path.join(c.paths.cwd, 'scripts')):
             copy_tree(path.join(c.paths.cwd, 'scripts'), path.join(c.paths.mount, 'scripts'))
         if path.isdir(path.join(c.paths.cwd, 'extras')):
@@ -28,6 +22,8 @@ class Configure(Service):
             os.makedirs(path.join(c.paths.mount, 'pool/extras'))
         if path.isdir(path.join(c.paths.cwd, 'iso')):
             copy_tree(path.join(c.paths.cwd, 'iso'), c.paths.mount)
+        self.__write_isolinux()
+        self.__write_preseed()
 
     def load_release(self):
         c = self.app.conf
@@ -90,3 +86,46 @@ class Configure(Service):
         os.system('umount ' + path.join(c.paths.filesystem, 'dev'))
         shutil.rmtree(path.join(c.paths.filesystem, 'root/scripts'))
         os.rename(path.join(c.paths.filesystem, 'etc/_resolv.conf'), path.join(c.paths.filesystem, 'etc/resolv.conf'))
+
+    def __write_preseed(self):
+        c = self.app.conf
+        s = self.app.services
+        if c.preseed:
+            shutil.copy(path.join(c.paths.src, 'preseed.seed'), path.join(c.paths.mount, 'preseed', c.preseed))
+            s.util.stamp_template(
+                path.join(c.paths.mount, 'preseed', c.preseed),
+                hostname=c.hostname,
+                packages=c.packages
+            )
+            if path.exists(path.join(c.paths.cwd, 'iso/preseed', c.preseed)):
+                lines = []
+                with open(path.join(c.paths.mount, 'preseed', c.preseed), 'r') as f:
+                    lines = f.readlines()
+                lines.append('\n')
+                with open(path.join(c.paths.cwd, 'iso/preseed', c.preseed), 'r') as f:
+                    for line in f.readlines():
+                        lines.append(line)
+                with open(path.join(c.paths.mount, 'preseed', c.preseed), 'w') as f:
+                    f.writelines(lines)
+
+    def __write_isolinux(self):
+        c = self.app.conf
+        s = self.app.services
+        if c.preseed:
+            shutil.copy(path.join(c.paths.src, 'isolinux/txt.cfg'), path.join(c.paths.mount, 'isolinux/txt.cfg'))
+            s.util.stamp_template(
+                path.join(c.paths.mount, 'isolinux/txt.cfg'),
+                description=c.description,
+                preseed=c.preseed,
+                install=c.paths.install[len(c.paths.install) - 7:]
+            )
+            if path.exists(path.join(c.paths.cwd, 'iso/isolinux/txt.cfg')):
+                lines = []
+                with open(path.join(c.paths.mount, 'isolinux/txt.cfg'), 'r') as f:
+                    lines = f.readlines()
+                lines.append('\n')
+                with open(path.join(c.paths.cwd, 'iso/isolinux/txt.cfg'), 'r') as f:
+                    for line in f.readlines():
+                        lines.append(line)
+                with open(path.join(c.paths.mount, 'isolinux/txt.cfg'), 'w') as f:
+                    f.writelines(lines)
