@@ -5,11 +5,11 @@ all: clean
 
 .PHONY: start
 start: env
-	@cd example && ../env/bin/python3 ../forkbuntu
+	@env/bin/python3 forkbuntu --src example
 
 .PHONY: debug
 debug: env
-	@cd example && ../env/bin/python3 ../forkbuntu --debug
+	@env/bin/python3 forkbuntu --src example --debug
 
 .PHONY: install
 install: env
@@ -34,15 +34,23 @@ freeze:
 .PHONY: build
 build: dist
 
-dist: clean env
-	@python setup.py sdist
-	@python setup.py bdist_wheel
+dist: clean install
+	@env/bin/python3 setup.py sdist
+	@env/bin/python3 setup.py bdist_wheel
 	@echo ran dist
 
 .PHONY: publish
 publish: dist
 	@twine upload dist/*
 	@echo published
+
+.PHONY: link
+link: install
+	@pip3 install -e .
+
+.PHONY: unlink
+unlink: install
+	@rm -r $(shell find . -name '*.egg-info')
 
 .PHONY: clean
 clean:

@@ -8,7 +8,6 @@ import re
 class Util(Service):
     def subproc(self, command, sudo=False):
         log = self.app.log
-        pargs = self.app.pargs
         spinner = self.app.spinner
         if not sudo:
             user = self.get_real_user()
@@ -28,7 +27,7 @@ class Util(Service):
                 log.error(err.output.decode('utf-8'))
             else:
                 raise err
-            if self.app.pargs.debug:
+            if c.debug:
                 raise err
             exit(1)
 
@@ -61,7 +60,6 @@ class Util(Service):
     def download(self, url, output_path):
         log = self.app.log
         output_path = path.abspath(output_path)
-        pargs = self.app.pargs
         spinner = self.app.spinner
         try:
             command = 'curl -L -o ' + output_path + ' ' + url
@@ -78,7 +76,7 @@ class Util(Service):
             matches = re.findall(r'Couldn\'t\sconnect\sto\sserver', err.output.decode('utf-8'))
             if len(matches) > 0:
                 spinner.fail('no internet connection')
-            if pargs.debug:
+            if c.debug:
                 if err.output:
                     log.error(err.output.decode('utf-8'))
                 raise err

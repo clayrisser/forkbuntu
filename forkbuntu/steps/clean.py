@@ -10,6 +10,8 @@ class Clean(Step):
     cache = False
     requires = ['initialize']
 
-    def run(self):
+    def run(self, reset=False):
         s = self.app.services
         s.clean.tmp()
+        if reset:
+            s.clean.cache()

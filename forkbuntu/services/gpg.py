@@ -24,7 +24,6 @@ class GPG(Service):
     def build_keyring(self):
         c = self.app.conf
         log = self.app.log
-        pargs = self.app.pargs
         s = self.app.services
         spinner = self.app.spinner
         if path.isdir(c.paths.keyring):
@@ -46,7 +45,7 @@ class GPG(Service):
             matches = re.findall(r'Temporary\sfailure\sresolving', err.output.decode('utf-8'))
             if len(matches) > 0:
                 spinner.fail('no internet connection')
-            if pargs.debug:
+            if c.debug:
                 if err.output:
                     log.error(err.output.decode('utf-8'))
                 raise err

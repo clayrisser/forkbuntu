@@ -49,8 +49,8 @@ class Extras(Service):
                 glob_path,
                 codename=c.codename,
                 description=c.description,
-                distrib_id=c.distrib_id,
                 name=c.name,
+                origin=c.origin,
                 paths=c.paths,
                 version=c.version
             )

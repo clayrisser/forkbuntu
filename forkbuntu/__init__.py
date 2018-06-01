@@ -7,6 +7,7 @@ from tempfile import mkdtemp
 from halo import Halo
 import os
 import re
+import sys
 import yaml
 
 def get_steps(app):
@@ -19,26 +20,45 @@ def get_steps(app):
     return context
 
 def load_conf(conf):
-    if not path.exists(path.abspath('config.yml')):
-        Halo(text='config.yml not found').fail()
+    if _.includes(sys.argv, '-h') or _.includes(sys.argv, '--help'):
+        return conf
+    cwd_path = os.getcwd()
+    flag = None
+    if _.includes(sys.argv, '--source'):
+        flag = '--source'
+    elif _.includes(sys.argv, '--src'):
+        flag = '--src'
+    elif _.includes(sys.argv, '-s'):
+        flag = '-s'
+    if flag:
+        flag_index = _.index_of(sys.argv, flag)
+        if len(sys.argv) > flag_index + 1:
+            cwd_path = path.abspath(sys.argv[flag_index + 1])
+    config_path = path.join(cwd_path, 'config.yml')
+    if not path.exists(config_path):
+        Halo(text='config not found: ' + config_path).fail()
         exit(1)
-    with open(path.abspath('config.yml'), 'r') as f:
+    with open(config_path, 'r') as f:
         try:
             conf = munchify(_.merge({}, conf, yaml.load(f)))
         except yaml.YAMLError as err:
             print(err)
             exit(1)
+    conf.paths.cwd = cwd_path
     if 'version' in conf:
         conf.version = str(conf.version)
     conf.paths.install = path.join(conf.paths.mount, 'casper')
     if not path.exists(path.join(conf.paths.install, 'filesystem.squashfs')):
         conf.paths.install = path.join(conf.paths.mount, 'install')
-    return munchify(_.merge({}, conf, {
+    output_path = conf.paths.output
+    conf = munchify(_.merge({}, conf, {
         'paths': _.zip_object(
             _.keys(conf.paths),
-            _.map(conf.paths, lambda item: path.abspath(path.join(conf.paths.cwd, item)))
+            _.map(conf.paths, lambda x: path.abspath(path.join(conf.paths.cwd, x)))
         )
     }))
+    conf.paths.output = path.abspath(output_path)
+    return conf
 
 App = create_app(
     name='forkbuntu',
@@ -50,6 +70,7 @@ App = create_app(
             'universe': True,
             'multiarch': True
         },
+        'debug': _.includes(sys.argv, '--debug'),
         'filesystem': {
             'compress': False
         },

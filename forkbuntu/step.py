@@ -60,7 +60,9 @@ class Step():
         if hasattr(self, 'checksum_paths'):
             s.cache.register(self.name)
 
-    def start(self):
+    def start(self, *args):
+        if hasattr(self, 'init'):
+            self.init()
         spinner = self.app.spinner
         cached = self.run_required()
         origional_cached = cached
@@ -71,7 +73,7 @@ class Step():
                 cached = origional_cached
             if not hasattr(self, 'cache') or self.cache != False:
                 return self.cached(cached)
-        self.run()
+        self.run(*args)
         self.register()
         return self.finish(cached)
 

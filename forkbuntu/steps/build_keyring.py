@@ -13,9 +13,8 @@ class BuildKeyring(Step):
         'merge_iso'
     ]
 
-    def __init__(self, name, app):
-        super().__init__(name, app)
-        c = app.conf
+    def init(self):
+        c = self.app.conf
         self.checksum_paths = [
             c.paths.keyring,
             path.join(path.expanduser('~'), '.gnupg/pubring.kbx')

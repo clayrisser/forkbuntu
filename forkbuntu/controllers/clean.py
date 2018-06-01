@@ -1,23 +1,32 @@
 from cement.core.controller import expose
 from cfoundation import Controller
+from os import path
 import json
 
 class Clean(Controller):
     class Meta:
-        description = 'Clean'
+        description = 'clean temporary files and cache'
         label = 'clean'
         stacked_on = 'base'
         stacked_type = 'nested'
         arguments = [
-            (['--cache'], {
-                'action': 'store_true',
-                'dest': 'cache',
-                'help': 'Clean cache',
+            (['--source', '--src', '-s'], {
+                'action': 'store',
+                'dest': 'src',
+                'help': 'source path',
                 'required': False
+            }),
+            (['output'], {
+                'action': 'store',
+                'help': 'built iso output path',
+                'nargs': '*'
             })
         ]
 
     @expose()
     def default(self):
         steps = self.app.steps
-        steps.clean.start()
+        pargs = self.app.pargs
+        if pargs.output and len(pargs.output) > 0:
+            self.app.conf.paths.output = path.abspath(pargs.output[0])
+        steps.clean.start(True)

@@ -1,4 +1,4 @@
-DISTRIB_ID={{ distrib_id }}
+DISTRIB_ID={{ name }}
 DISTRIB_RELEASE={{ version }}
 DISTRIB_CODENAME={{ codename }}
 DISTRIB_DESCRIPTION="{{ description }}"

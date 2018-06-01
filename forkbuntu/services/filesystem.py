@@ -29,7 +29,7 @@ class Filesystem(Service):
             path.join(c.paths.filesystem, 'etc/lsb-release'),
             codename=c.codename,
             description=c.description,
-            distrib_id=c.distrib_id,
+            name=c.name,
             version=c.version
         )
         if path.isdir(path.join(c.paths.cwd, 'filesystem')):

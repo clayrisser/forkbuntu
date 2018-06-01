@@ -12,10 +12,6 @@ class LoadConfig(Step):
     cache = False
     requires = ['unpack_filesystem']
 
-    def __init__(self, name, app):
-        super().__init__(name, app)
-        c = app.conf
-
     def run(self):
         c = self.app.conf
         log = self.app.log
@@ -28,7 +24,7 @@ class LoadConfig(Step):
         spinner.start()
         self.app.conf = munchify(_.merge({}, self.app.conf, {
             'codename': c.codename if 'codename' in c else release.distrib_codename,
-            'distrib_id': c.distrib_id if 'distrib_id' in c else release.distrib_id,
+            'origin': c.origin if 'origin' in c else release.distrib_id,
             'name': c.name if 'name' in c else release.distrib_name,
             'version': c.version if 'version' in c else release.distrib_version
         }))

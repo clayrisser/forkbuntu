@@ -10,9 +10,8 @@ class CreateExtras(Step):
     })
     requires = ['build_keyring']
 
-    def __init__(self, name, app):
-        super().__init__(name, app)
-        c = app.conf
+    def init(self):
+        c = self.app.conf
         self.checksum_paths = [
             c.paths.apt_ftparchive,
             c.paths.indices

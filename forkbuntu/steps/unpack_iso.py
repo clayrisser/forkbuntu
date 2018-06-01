@@ -10,9 +10,8 @@ class UnpackIso(Step):
     requires = ['initialize']
     root = True
 
-    def __init__(self, name, app):
-        super().__init__(name, app)
-        c = app.conf
+    def init(self):
+        c = self.app.conf
         self.has_paths = [c.paths.output]
         self.checksum_paths = [
             c.paths.iso,
