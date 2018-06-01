@@ -11,4 +11,4 @@ class PackFilesystem(Step):
 
     def run(self):
         s = self.app.services
-        s.pack.filesystem()
+        s.filesystem.pack()

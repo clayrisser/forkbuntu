@@ -11,4 +11,4 @@ class ConfigureFilesystem(Step):
 
     def run(self):
         s = self.app.services
-        s.configure.filesystem()
+        s.filesystem.configure()

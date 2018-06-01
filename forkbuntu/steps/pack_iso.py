@@ -11,4 +11,4 @@ class PackIso(Step):
 
     def run(self):
         s = self.app.services
-        s.pack.iso()
+        s.iso.pack()

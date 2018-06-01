@@ -20,4 +20,4 @@ class SignIso(Step):
 
     def run(self):
         s = self.app.services
-        s.configure.sign_iso()
+        s.iso.sign()

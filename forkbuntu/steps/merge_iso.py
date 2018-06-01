@@ -11,4 +11,4 @@ class MergeIso(Step):
 
     def run(self):
         s = self.app.services
-        s.configure.merge_iso()
+        s.iso.merge()

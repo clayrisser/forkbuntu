@@ -11,4 +11,4 @@ class UnpackFilesystem(Step):
 
     def run(self):
         s = self.app.services
-        s.unpack.filesystem()
+        s.filesystem.unpack()

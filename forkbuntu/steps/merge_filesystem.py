@@ -11,4 +11,4 @@ class MergeFilesystem(Step):
 
     def run(self):
         s = self.app.services
-        s.configure.merge_filesystem()
+        s.filesystem.merge()

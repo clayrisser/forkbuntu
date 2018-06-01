@@ -27,4 +27,4 @@ class UnpackIso(Step):
 
     def run(self):
         s = self.app.services
-        s.unpack.iso()
+        s.iso.unpack()
