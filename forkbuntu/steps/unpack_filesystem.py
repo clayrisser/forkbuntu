@@ -5,7 +5,6 @@ from os import path
 
 class UnpackFilesystem(Step):
     messages = munchify({
-        'cache': 'unpack filesystem using cache',
         'past': 'unpacked filesystem',
         'present': 'unpacking filesystem'
     })

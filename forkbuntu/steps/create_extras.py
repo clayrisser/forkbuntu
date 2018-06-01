@@ -5,7 +5,6 @@ from os import path
 class CreateExtras(Step):
     agnostic = True
     messages = munchify({
-        'cache': 'create extras using cache',
         'past': 'created extras',
         'present': 'creating extras',
     })

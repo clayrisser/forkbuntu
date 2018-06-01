@@ -5,8 +5,7 @@ from os import path
 class SignIso(Step):
     messages = munchify({
         'past': 'signed iso',
-        'present': 'signing iso',
-        'cache': 'using signed iso cache'
+        'present': 'signing iso'
     })
     requires = [
         'create_extras',

@@ -20,10 +20,6 @@ class GPG(Service):
             os.makedirs(private_keys_path)
             self.__chmod_gpg()
 
-    def get_ubuntu_keys(self):
-        all_gpg_keys = self.get_keys(include_ubuntu_keys=True)
-        return _.filter(all_gpg_keys, lambda key: _.includes(self.ubuntu_keys, key.pub.key.short))
-
     def build_keyring(self):
         c = self.app.conf
         log = self.app.log
@@ -62,7 +58,6 @@ class GPG(Service):
         keyrings_path = path.join(ubuntu_keyring_path, 'keyrings')
         os.chdir(keyrings_path)
         s.util.subproc('gpg --import < ' + path.join(keyrings_path, 'ubuntu-archive-keyring.gpg'))
-        ubuntu_keys = self.get_ubuntu_keys()
         gpg_key = None
         if len(self.app.gpg_keys) == 1:
             gpg_key = self.app.gpg_keys[0]

@@ -39,7 +39,7 @@ class Pack(Service):
             + path.join(c.paths.install, 'filesystem.squashfs') + compress,
             sudo=True
         )
-        size = s.util.subproc('du -sx --block-size=1 ' + c.paths.filesystem + ' | cut -f1')
+        size = s.util.subproc('du -sx --block-size=1 ' + c.paths.filesystem + ' | cut -f1', sudo=True)
         log.debug('size: ' + size)
         with open(path.join(c.paths.install, 'filesystem.size'), 'w') as f:
             f.write(size)

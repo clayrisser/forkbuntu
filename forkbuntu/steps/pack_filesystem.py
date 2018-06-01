@@ -5,8 +5,7 @@ from os import path
 class PackFilesystem(Step):
     messages = munchify({
         'past': 'packed filesystem',
-        'present': 'packing filesystem',
-        'cache': 'using packed filesystem cache'
+        'present': 'packing filesystem'
     })
     requires = [
         'configure_filesystem'

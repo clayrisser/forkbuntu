@@ -4,7 +4,6 @@ from os import path
 
 class ConfigureFilesystem(Step):
     messages = munchify({
-        'cache': 'configure filesystem using cache',
         'past': 'configured filesystem',
         'present': 'configuring filesystem'
     })

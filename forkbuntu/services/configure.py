@@ -94,6 +94,7 @@ class Configure(Service):
             shutil.copy(path.join(c.paths.src, 'preseed.seed'), path.join(c.paths.mount, 'preseed', c.preseed))
             s.util.stamp_template(
                 path.join(c.paths.mount, 'preseed', c.preseed),
+                apt=c.apt,
                 hostname=c.hostname,
                 packages=c.packages
             )

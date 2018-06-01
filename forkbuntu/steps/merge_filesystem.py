@@ -4,7 +4,6 @@ from os import path
 
 class MergeFilesystem(Step):
     messages = munchify({
-        'cache': 'merge filesystem using cache',
         'past': 'merged filesystem',
         'present': 'merging filesystem'
     })

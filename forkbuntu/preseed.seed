@@ -30,9 +30,8 @@ d-i pkgsel/include string \
 {% endfor %}
 {% endif %}# Post install
 d-i preseed/late_command string \
-    cp -r /cdrom/scripts /target/root && \
-    chroot /target chmod +x /root/scripts/*.sh && \
-    chroot /target bash /root/scripts/run_postinstall.sh
+    rsync /cdrom/scripts /target/root --chmod=ugo+rwx
+    # chroot /target bash /root/scripts/run_postinstall.sh
 
 # Network configuration
 d-i netcfg/get_hostname string {{ hostname }}
@@ -42,6 +41,6 @@ d-i netcfg/get_hostname seen false
 tasksel tasksel/first multiselect standard
 
 # Apt setup
-d-i apt-setup/restricted boolean true
-d-i apt-setup/universe boolean true
-d-i apt-setup/multiarch string i386
+d-i apt-setup/restricted boolean {{ apt.restricted|lower }}
+d-i apt-setup/universe boolean {{ apt.universe|lower }}{% if apt.multiarch %}
+d-i apt-setup/multiarch string i386{% endif %}

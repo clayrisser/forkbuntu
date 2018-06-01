@@ -15,6 +15,10 @@ class Base(Controller):
         c = self.app.conf
         spinner = self.app.spinner
         steps = self.app.steps
+        s = self.app.services
+        setattr(self.app, 'finished', s.cache.is_finished())
+        s.cache.started()
         steps.pack_iso.start()
         steps.clean.start()
         spinner.start('iso created: ' + c.paths.output).succeed()
+        s.cache.finished()

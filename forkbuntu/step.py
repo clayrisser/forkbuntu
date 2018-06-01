@@ -2,10 +2,9 @@ from munch import Munch
 from os import path
 from pydash import _
 
-steps_run = Munch()
+steps_ran = Munch()
 
 class Step():
-    global steps_run
     cache = True
 
     def __init__(self, name, app):
@@ -14,6 +13,7 @@ class Step():
         self.log = app.log
 
     def run_required(self):
+        global steps_ran
         steps = self.app.steps
         cached = True
         if not hasattr(self, 'requires'):
@@ -22,8 +22,8 @@ class Step():
             cached = False
         for required in self.requires:
             maybe_cached = True
-            if _.includes(_.keys(steps_run), required):
-                maybe_cached = steps_run[required]
+            if _.includes(_.keys(steps_ran), required):
+                maybe_cached = steps_ran[required]
             else:
                 maybe_cached = getattr(steps, required).start()
             if not maybe_cached:
@@ -33,16 +33,19 @@ class Step():
     def is_cached(self, cached):
         s = self.app.services
         spinner = self.app.spinner
+        if hasattr(self, 'root') and self.root and not self.app.finished:
+            return False
         if not hasattr(self, 'checksum_paths') and not hasattr(self, 'has_paths'):
             return cached
-        if not cached and (not hasattr(self, 'root') or not self.root):
+        if not cached and (not hasattr(self, 'root') or not self.root) and \
+           (not hasattr(self, 'agnostic') or not self.agnostic):
             return cached
         cached = True
         checksum_paths = self.checksum_paths if hasattr(self, 'checksum_paths') else []
         has_paths = self.has_paths if hasattr(self, 'has_paths') else []
         for checksum_path in checksum_paths:
             checksum = s.cache.checksum(checksum_path)
-            cached_checksums = s.cache.get(self.name)
+            cached_checksums = s.cache.get_checksums(self.name)
             if not _.includes(cached_checksums, checksum):
                 cached = False
                 break
@@ -73,15 +76,16 @@ class Step():
         return self.finish(cached)
 
     def cached(self, cached):
-        global steps_run
+        global steps_ran
+        s = self.app.services
         spinner = self.app.spinner
-        steps_run[self.name] = cached
-        spinner.warn(self.messages.cache)
+        steps_ran[self.name] = cached
+        spinner.warn(self.messages.past + ' using cache')
         return cached
 
     def finish(self, cached):
-        global steps_run
+        s = self.app.services
         spinner = self.app.spinner
-        steps_run[self.name] = cached
+        steps_ran[self.name] = cached
         spinner.succeed(self.messages.past)
         return cached

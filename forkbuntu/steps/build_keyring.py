@@ -5,7 +5,6 @@ from os import path
 class BuildKeyring(Step):
     agnostic = True
     messages = munchify({
-        'cache': 'build keyring using cache',
         'past': 'built keyring',
         'present': 'building keyring'
     })

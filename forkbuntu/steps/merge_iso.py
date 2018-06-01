@@ -5,7 +5,6 @@ from os import path
 
 class MergeIso(Step):
     messages = munchify({
-        'cache': 'merge iso using cache',
         'past': 'merged iso',
         'present': 'merging iso'
     })

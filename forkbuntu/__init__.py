@@ -41,6 +41,11 @@ App = create_app(
     controllers=controllers,
     services=services,
     conf=load_conf({
+        'apt': {
+            'restricted': True,
+            'universe': True,
+            'multiarch': True
+        },
         'filesystem': {
             'compress': False
         },

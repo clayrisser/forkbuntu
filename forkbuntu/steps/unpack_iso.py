@@ -5,7 +5,6 @@ from os import path
 
 class UnpackIso(Step):
     messages = munchify({
-        'cache': 'unpack iso using cache',
         'past': 'unpacked iso',
         'present': 'unpacking iso'
     })

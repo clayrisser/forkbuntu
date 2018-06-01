@@ -5,3 +5,6 @@ paths:
   output: forkbuntu.iso
 packages:
   - cowsay
+apt:
+  restricted: false
+  multiarch: false
