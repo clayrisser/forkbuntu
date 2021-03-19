@@ -9,7 +9,7 @@ cursor==1.2.0
 enum34==1.1.6
 halo==0.0.12
 inquirer==2.2.0
-Jinja2==2.10
+Jinja2==2.11.3
 log-symbols==0.0.11
 MarkupSafe==1.0
 munch==2.3.2
