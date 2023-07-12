@@ -4,6 +4,8 @@
 
 > Easily create your own ubuntu distribution and install cd
 
+![](assets/forkbuntu.png)
+
 Please ★ this repo if you found it useful ★ ★ ★
 
 
