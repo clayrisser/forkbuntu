@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-08-12
+### Added
+* autoinstall support for modern subiquity isos (Ubuntu 20.04+)
+* `squashfs` config key to pick a layer on multi-squashfs isos
+* unit test suite and containerized end-to-end test
+### Changed
+* Python 3.12+ with uv-managed packaging
+* iso unpacking and packing use xorriso (no more loop mounts); boot
+  arguments are captured from the source iso so hybrid BIOS/UEFI isos
+  repack correctly
+* keyring rebuild is now opt-in via `keyring: true` and the extras
+  repository is only generated when an `extras/` directory exists
+* preseeding defaults on only for legacy debian-installer isos
+### Removed
+* cement/cfoundation framework and other unmaintained dependencies
+
 ## [0.2.10] - 2018-06-02
 ### Added
 * check for missing programs
