@@ -1,22 +1,24 @@
-from ..step import Step
-from munch import munchify
+from __future__ import annotations
+
 from os import path
 
+from munch import Munch
+
+from ..step import Step
+
+
 class SignIso(Step):
-    messages = munchify({
-        'past': 'signed iso',
-        'present': 'signing iso'
-    })
-    requires = [
-        'create_extras',
-        'pack_filesystem'
-    ]
+    messages = Munch(past="signed iso", present="signing iso")
 
-    def init(self):
+    def init(self) -> None:
         c = self.app.conf
-        if path.exists(path.join(c.paths.cwd, 'initrd')):
-            self.requires.append('pack_initrd')
+        requires = ["merge_iso", "pack_filesystem"]
+        if path.isdir(path.join(c.paths.cwd, "extras")):
+            requires.append("create_extras")
+        if path.isdir(path.join(c.paths.cwd, "initrd")):
+            requires.append("pack_initrd")
+        self.requires = requires
 
-    def run(self):
+    def run(self, *args: object) -> None:
         s = self.app.services
         s.iso.sign()

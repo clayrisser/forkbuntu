@@ -1,14 +1,14 @@
+from __future__ import annotations
+
+from munch import Munch
+
 from ..step import Step
-from munch import munchify
-from os import path
+
 
 class MergeInitrd(Step):
-    messages = munchify({
-        'past': 'merged initrd',
-        'present': 'merging initrd'
-    })
-    requires = ['unpack_initrd']
+    messages = Munch(past="merged initrd", present="merging initrd")
+    requires = ["unpack_initrd"]
 
-    def run(self):
+    def run(self, *args: object) -> None:
         s = self.app.services
         s.initrd.merge()

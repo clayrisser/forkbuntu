@@ -1,28 +1,42 @@
-from munch import Munch
+from __future__ import annotations
+
 from os import path
-from pydash import _
+from typing import TYPE_CHECKING
 
-steps_ran = Munch()
+from munch import Munch
 
-class Step():
+if TYPE_CHECKING:
+    from .app import App
+
+
+class Step:
     cache = True
+    agnostic = False
+    root = False
+    messages: Munch
+    requires: list[str] = []
+    checksum_paths: list[str] | None = None
+    has_paths: list[str] | None = None
 
-    def __init__(self, name, app):
+    def __init__(self, name: str, app: App) -> None:
         self.name = name
         self.app = app
         self.log = app.log
 
-    def run_required(self):
-        global steps_ran
+    def init(self) -> None:
+        pass
+
+    def run(self, *args: object) -> None:
+        raise NotImplementedError
+
+    def run_required(self) -> bool:
         steps = self.app.steps
+        steps_ran = self.app.steps_ran
         cached = True
-        if not hasattr(self, 'requires'):
-            return False
         if len(self.requires) <= 0:
-            cached = False
+            return False
         for required in self.requires:
-            maybe_cached = True
-            if _.includes(_.keys(steps_ran), required):
+            if required in steps_ran:
                 maybe_cached = steps_ran[required]
             else:
                 maybe_cached = getattr(steps, required).start()
@@ -30,64 +44,56 @@ class Step():
                 cached = maybe_cached
         return cached
 
-    def is_cached(self, cached):
+    def is_cached(self, cached: bool) -> bool:
         s = self.app.services
-        spinner = self.app.spinner
-        if hasattr(self, 'root') and self.root and not self.app.finished:
+        if self.root and not self.app.finished:
             return False
-        if not hasattr(self, 'checksum_paths') and not hasattr(self, 'has_paths'):
+        if self.checksum_paths is None and self.has_paths is None:
             return cached
-        if not cached and (not hasattr(self, 'root') or not self.root) and \
-           (not hasattr(self, 'agnostic') or not self.agnostic):
+        if not cached and not self.root and not self.agnostic:
             return cached
         cached = True
-        checksum_paths = self.checksum_paths if hasattr(self, 'checksum_paths') else []
-        has_paths = self.has_paths if hasattr(self, 'has_paths') else []
-        for checksum_path in checksum_paths:
+        for checksum_path in self.checksum_paths or []:
             checksum = s.cache.checksum(checksum_path)
             cached_checksums = s.cache.get_checksums(self.name)
-            if not _.includes(cached_checksums, checksum):
+            if checksum not in cached_checksums:
                 cached = False
                 break
-        for has_path in has_paths:
+        for has_path in self.has_paths or []:
             if not path.exists(has_path):
                 cached = False
                 break
         return cached
 
-    def register(self):
+    def register(self) -> None:
         s = self.app.services
-        if hasattr(self, 'checksum_paths'):
+        if self.checksum_paths is not None:
             s.cache.register(self.name)
 
-    def start(self, *args):
-        if hasattr(self, 'init'):
-            self.init()
+    def start(self, *args: object) -> bool:
+        self.init()
         spinner = self.app.spinner
         cached = self.run_required()
-        origional_cached = cached
+        original_cached = cached
         spinner.start(self.messages.present)
         cached = self.is_cached(cached)
         if cached:
-            if hasattr(self, 'agnostic') and self.agnostic:
-                cached = origional_cached
-            if not hasattr(self, 'cache') or self.cache != False:
+            if self.agnostic:
+                cached = original_cached
+            if self.cache:
                 return self.cached(cached)
         self.run(*args)
         self.register()
         return self.finish(cached)
 
-    def cached(self, cached):
-        global steps_ran
-        s = self.app.services
+    def cached(self, cached: bool) -> bool:
         spinner = self.app.spinner
-        steps_ran[self.name] = cached
-        spinner.warn(self.messages.past + ' using cache')
+        self.app.steps_ran[self.name] = cached
+        spinner.warn(self.messages.past + " using cache")
         return cached
 
-    def finish(self, cached):
-        s = self.app.services
+    def finish(self, cached: bool) -> bool:
         spinner = self.app.spinner
-        steps_ran[self.name] = cached
+        self.app.steps_ran[self.name] = cached
         spinner.succeed(self.messages.past)
         return cached

@@ -1,15 +1,19 @@
-from cfoundation import Service
-from os import path
+from __future__ import annotations
+
 import os
 import shutil
+from os import path
+
+from ..service import Service
+
 
 class Clean(Service):
-    def tmp(self):
+    def tmp(self) -> None:
         c = self.app.conf
         if path.exists(c.paths.tmp):
             shutil.rmtree(c.paths.tmp)
 
-    def cache(self, reset=False):
+    def cache(self) -> None:
         c = self.app.conf
         if path.exists(c.paths.cwt):
             shutil.rmtree(c.paths.cwt)

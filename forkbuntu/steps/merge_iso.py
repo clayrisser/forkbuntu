@@ -1,14 +1,14 @@
+from __future__ import annotations
+
+from munch import Munch
+
 from ..step import Step
-from munch import munchify
-from os import path
+
 
 class MergeIso(Step):
-    messages = munchify({
-        'past': 'merged iso',
-        'present': 'merging iso'
-    })
-    requires = ['load_config']
+    messages = Munch(past="merged iso", present="merging iso")
+    requires = ["load_config"]
 
-    def run(self):
+    def run(self, *args: object) -> None:
         s = self.app.services
         s.iso.merge()

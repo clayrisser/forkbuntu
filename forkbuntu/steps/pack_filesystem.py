@@ -1,14 +1,14 @@
+from __future__ import annotations
+
+from munch import Munch
+
 from ..step import Step
-from munch import munchify
-from os import path
+
 
 class PackFilesystem(Step):
-    messages = munchify({
-        'past': 'packed filesystem',
-        'present': 'packing filesystem'
-    })
-    requires = ['configure_filesystem']
+    messages = Munch(past="packed filesystem", present="packing filesystem")
+    requires = ["configure_filesystem"]
 
-    def run(self):
+    def run(self, *args: object) -> None:
         s = self.app.services
         s.filesystem.pack()

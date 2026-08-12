@@ -1,14 +1,14 @@
+from __future__ import annotations
+
+from munch import Munch
+
 from ..step import Step
-from munch import munchify
-from os import path
+
 
 class MergeFilesystem(Step):
-    messages = munchify({
-        'past': 'merged filesystem',
-        'present': 'merging filesystem'
-    })
-    requires = ['load_config']
+    messages = Munch(past="merged filesystem", present="merging filesystem")
+    requires = ["load_config"]
 
-    def run(self):
+    def run(self, *args: object) -> None:
         s = self.app.services
         s.filesystem.merge()
