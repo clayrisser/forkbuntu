@@ -1,59 +1,72 @@
-CWD := $(shell pwd)
+.POSIX:
+export ROOTDIR ?= $(eval ROOTDIR := $(shell git rev-parse --show-toplevel))$(ROOTDIR)
+include $(ROOTDIR)/make.mk
 
-.PHONY: all
-all: clean
+.DEFAULT_GOAL := lint
 
-.PHONY: start
-start: env
-	@env/bin/python3 forkbuntu --src example
+ASDF_VERSION ?= v0.18.0
+.PHONY: prepare prepare/asdf prepare/cloc
+prepare: sudo
+	@command -v asdf >/dev/null 2>&1 || $(MAKE) prepare/asdf
+	@command -v cloc >/dev/null 2>&1 || $(MAKE) prepare/cloc
+	@awk '!/^#/ && NF {print $$1}' .tool-versions | \
+		while read t; do asdf plugin add "$$t" 2>/dev/null || true; done
+	@rcfile=$$(mktemp); \
+		{ asdf install 2>&1; echo $$? >$$rcfile; } | grep --line-buffered -v 'is already installed' || true; \
+		rc=$$(cat $$rcfile); rm -f $$rcfile; exit $$rc
+	@$(UV) sync
+prepare/asdf:
+	@command -v brew >/dev/null 2>&1 && brew install asdf || { \
+		o=$$(uname | tr A-Z a-z); a=$$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/'); \
+		curl -fsSL "https://github.com/asdf-vm/asdf/releases/download/$(ASDF_VERSION)/asdf-$(ASDF_VERSION)-$$o-$$a.tar.gz" \
+			| $(SUDO) tar -xz -C /usr/local/bin asdf; \
+	}
+prepare/cloc:
+	@$(PKG_INSTALL) cloc
 
-.PHONY: debug
-debug: env
-	@env/bin/python3 forkbuntu --src example --debug
+.PHONY: configure
+configure:
+	@for cmd in asdf $(UV) $(SHFMT) $(CLOC); do \
+		command -v $$cmd >/dev/null 2>&1 || { echo "$$cmd is missing, run \`make prepare\`"; exit 1; }; \
+	done
 
-.PHONY: install
-install: env
+# Shared (used by both format and lint)
+_SHFILES = find forkbuntu example tests -type f -name '*.sh' -print0
 
-.PHONY: uninstall
-uninstall:
-	-@rm -rf env >/dev/null || true
+.PHONY: format
+format: configure
+	@$(BLACK) forkbuntu tests
+	@$(_SHFILES) | xargs -0 $(SHFMT) -w
 
-.PHONY: reinstall
-reinstall: uninstall install
+.PHONY: lint
+lint: configure
+	@$(BLACK) --check forkbuntu tests
+	@$(BASEDPYRIGHT)
+	@$(_SHFILES) | xargs -0 $(SHFMT) -d
 
-env:
-	@virtualenv env
-	@env/bin/pip3 install -r ./requirements.txt
-	@echo ::: ENV :::
+.PHONY: test
+test: test/unit
 
-.PHONY: freeze
-freeze:
-	@env/bin/pip3 freeze > ./requirements.txt
-	@echo ::: FREEZE :::
+.PHONY: test/unit
+test/unit: configure
+	@$(PYTEST) --cov=forkbuntu --cov-report=term --cov-report=xml:coverage.xml
 
-.PHONY: build
-build: dist
+DOCKER ?= docker
+.PHONY: test/e2e
+test/e2e: configure
+	@$(DOCKER) run --rm -v "$(ROOTDIR):/opt/forkbuntu" -w /opt/forkbuntu \
+		ubuntu:24.04 sh tests/e2e/inside.sh
 
-dist: clean install
-	@env/bin/python3 setup.py sdist
-	@env/bin/python3 setup.py bdist_wheel
-	@echo ran dist
-
-.PHONY: publish
-publish: dist
-	@twine upload dist/*
-	@echo published
-
-.PHONY: link
-link: install
-	@pip3 install -e .
-
-.PHONY: unlink
-unlink: install
-	@rm -r $(shell find . -name '*.egg-info')
+.PHONY: count
+count: configure
+	@$(CLOC) --vcs=git
 
 .PHONY: clean
 clean:
-	-@rm -rf */__pycache__ */*/__pycache__ README.rst dist build \
-		example/.tmp *.egg-info >/dev/null || true
-	@echo ::: CLEAN :::
+	@rm -rf dist coverage.xml .pytest_cache example/.tmp example/*.iso
+	@find . -type d -name __pycache__ -prune -exec rm -rf {} +
+	@rm -rf $(MAKEDIR)
+
+.PHONY: purge
+purge: clean
+	@$(GIT) clean -fxd

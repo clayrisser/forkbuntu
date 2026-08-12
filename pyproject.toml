@@ -1,0 +1,69 @@
+[project]
+name = "forkbuntu"
+version = "0.3.0"
+description = "Easily create your own Ubuntu distribution and install CD"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [{ name = "Clay Risser", email = "clayrisser@gmail.com" }]
+keywords = ["ubuntu", "remaster", "fork", "install", "linux", "iso"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Topic :: Utilities",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+  "halo>=0.0.31",
+  "inquirer>=3.4",
+  "jinja2>=3.1",
+  "munch>=4.0",
+  "pyyaml>=6.0",
+]
+
+[project.urls]
+Homepage = "https://gitlab.com/bitspur/misc/forkbuntu"
+Repository = "https://gitlab.com/bitspur/misc/forkbuntu"
+
+[project.scripts]
+forkbuntu = "forkbuntu.cli:main"
+
+[dependency-groups]
+dev = [
+  "basedpyright>=1.29",
+  "black>=25.1",
+  "pytest>=8.3",
+  "pytest-cov>=6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["forkbuntu"]
+
+[tool.black]
+target-version = ["py312"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.coverage.run]
+source = ["forkbuntu"]
+
+[tool.basedpyright]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+include = ["forkbuntu", "tests"]
+# Pragmatic settings for a legacy codebase built on untyped libraries
+# (munch config objects are dynamic by design).
+reportMissingTypeStubs = false
+reportAttributeAccessIssue = false
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false

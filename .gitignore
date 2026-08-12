@@ -103,8 +103,10 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# Make
+.make/
+
 # Application
 *.iso
 .tmp/
-README.rst
 *.deb
