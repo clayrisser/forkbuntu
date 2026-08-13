@@ -1,22 +1,24 @@
+from __future__ import annotations
+
+from munch import Munch
+
 from ..step import Step
-from munch import munchify
-from os import path
+
 
 class CreateExtras(Step):
     agnostic = True
-    messages = munchify({
-        'past': 'created extras',
-        'present': 'creating extras',
-    })
-    requires = ['build_keyring']
+    messages = Munch(past="created extras", present="creating extras")
 
-    def init(self):
+    def init(self) -> None:
         c = self.app.conf
+        # Rebuilding the archive keyring is only needed when the extras
+        # repository must be trusted by the legacy debian-installer.
+        self.requires = ["build_keyring"] if c.keyring else ["merge_iso"]
         self.checksum_paths = [
             c.paths.apt_ftparchive,
-            c.paths.indices
+            c.paths.indices,
         ]
 
-    def run(self):
+    def run(self, *args: object) -> None:
         s = self.app.services
         s.extras.create()

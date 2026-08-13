@@ -31,7 +31,7 @@ d-i pkgsel/include string \
 {% endif %}# Post install
 d-i preseed/late_command string \
     cp -r /cdrom/scripts /target/root && \
-    chroot /target bash /root/scripts/run_postinstall.sh
+    chroot /target sh /root/scripts/run_postinstall.sh
 
 # Network configuration
 d-i netcfg/get_hostname string {{ hostname }}

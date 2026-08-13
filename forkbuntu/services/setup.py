@@ -1,49 +1,66 @@
-from cfoundation import Service
-from os import path
-from pydash import _
+from __future__ import annotations
+
 import os
 import shutil
 import sys
+from os import path
+
+from ..service import Service
+
+core_programs = [
+    "bash",
+    "cat",
+    "chmod",
+    "chown",
+    "chroot",
+    "cpio",
+    "curl",
+    "cut",
+    "du",
+    "find",
+    "gunzip",
+    "gzip",
+    "md5sum",
+    "mksquashfs",
+    "mount",
+    "umount",
+    "unsquashfs",
+    "xorriso",
+]
+keyring_programs = [
+    "apt-get",
+    "dpkg-buildpackage",
+    "fakeroot",
+    "gpg",
+]
+extras_programs = [
+    "apt-ftparchive",
+]
+
 
 class Setup(Service):
-    missing_programs = []
-
-    def init(self):
+    def init(self) -> None:
+        c = self.app.conf
+        s = self.app.services
         spinner = self.app.spinner
         if os.geteuid() != 0:
-            self.app.spinner.fail('please run as root')
-            exit(1)
-        self.__has_program('apt-ftparchive')
-        self.__has_program('apt-ftparchive')
-        self.__has_program('apt-get')
-        self.__has_program('bash')
-        self.__has_program('cat')
-        self.__has_program('chmod')
-        self.__has_program('chown')
-        self.__has_program('chown')
-        self.__has_program('curl')
-        self.__has_program('cut')
-        self.__has_program('dpkg-buildpackage')
-        self.__has_program('du')
-        self.__has_program('fakeroot')
-        self.__has_program('find')
-        self.__has_program('gpg')
-        self.__has_program('gzip')
-        self.__has_program('mkisofs')
-        self.__has_program('mksquashfs')
-        self.__has_program('mount')
-        self.__has_program('rngd')
-        self.__has_program('sudo')
-        self.__has_program('umount')
-        self.__has_program('unsquashfs')
-        if len(self.missing_programs) > 0:
-            spinner.fail('missing the following programs')
-            sys.stdout.writelines(_.map(self.missing_programs, lambda x: x + '\n'))
-            exit(1)
+            spinner.fail("please run as root")
+            raise SystemExit(1)
+        programs = list(core_programs)
+        if s.util.get_real_user() != "root":
+            programs.append("sudo")
+        if c.keyring:
+            programs += keyring_programs
+        if path.isdir(path.join(c.paths.cwd, "extras")):
+            programs += extras_programs
+        missing_programs = [
+            program for program in programs if not self._has_program(program)
+        ]
+        if len(missing_programs) > 0:
+            spinner.fail("missing the following programs")
+            sys.stdout.writelines([program + "\n" for program in missing_programs])
+            raise SystemExit(1)
 
-    def __has_program(self, program):
+    def _has_program(self, program: str) -> bool:
         program_path = shutil.which(program)
-        if not program_path or len(program_path) <= 0:
-            self.missing_programs.append(program)
-            return False
-        return True
+        return bool(program_path)

@@ -1,14 +1,14 @@
+from __future__ import annotations
+
+from munch import Munch
+
 from ..step import Step
-from munch import munchify
-from os import path
+
 
 class PackIso(Step):
-    messages = munchify({
-        'past': 'packed iso',
-        'present': 'packing iso'
-    })
-    requires = ['sign_iso']
+    messages = Munch(past="packed iso", present="packing iso")
+    requires = ["sign_iso"]
 
-    def run(self):
+    def run(self, *args: object) -> None:
         s = self.app.services
         s.iso.pack()

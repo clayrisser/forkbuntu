@@ -1,14 +1,14 @@
+from __future__ import annotations
+
+from munch import Munch
+
 from ..step import Step
-from munch import munchify
-from os import path
+
 
 class PackInitrd(Step):
-    messages = munchify({
-        'past': 'packed initrd',
-        'present': 'packing initrd'
-    })
-    requires = ['merge_initrd']
+    messages = Munch(past="packed initrd", present="packing initrd")
+    requires = ["merge_initrd"]
 
-    def run(self):
+    def run(self, *args: object) -> None:
         s = self.app.services
         s.initrd.pack()

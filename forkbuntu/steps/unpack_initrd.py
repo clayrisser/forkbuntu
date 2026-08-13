@@ -1,14 +1,14 @@
+from __future__ import annotations
+
+from munch import Munch
+
 from ..step import Step
-from munch import munchify
-from os import path
+
 
 class UnpackInitrd(Step):
-    messages = munchify({
-        'past': 'unpacked initrd',
-        'present': 'unpacking initrd'
-    })
-    requires = ['unpack_iso']
+    messages = Munch(past="unpacked initrd", present="unpacking initrd")
+    requires = ["unpack_iso"]
 
-    def run(self):
+    def run(self, *args: object) -> None:
         s = self.app.services
         s.initrd.unpack()

@@ -1,82 +1,135 @@
 # forkbuntu
 
-[![GitHub stars](https://img.shields.io/github/stars/codejamninja/forkbuntu.svg?style=social&label=Stars)](https://github.com/codejamninja/forkbuntu)
-
-> Easily create your own ubuntu distribution and install cd
+> Easily create your own Ubuntu distribution and install CD
 
 ![](assets/forkbuntu.png)
 
 Please ★ this repo if you found it useful ★ ★ ★
 
-
 ## Features
 
-* Simple config file
-* Add custom packages
-* Postinstall script
-* Preseed install cd
-
+- Simple config file
+- Rebrand the filesystem and iso metadata
+- Overlay custom files onto the filesystem and iso
+- Run configure scripts inside the unpacked filesystem (chroot)
+- Autoinstall support for modern subiquity isos (Ubuntu 20.04+)
+- Preseed support for legacy debian-installer isos (Ubuntu 18.04 and older)
+- Add custom packages and postinstall scripts
+- Incremental rebuilds via content checksums
 
 ## Installation
 
 ```sh
-sudo pip3 install forkbuntu
+uv tool install forkbuntu
 ```
-
 
 ## Dependencies
 
-* [Python 3](https://www.python.org/download/releases/3.0)
-* [GnuPG](https://www.gnupg.org)
-* [Squashfs](http://squashfs.sourceforge.net)
-* [Mkisofs](https://sourceforge.net/projects/cdrtools/files/mkisofs/old)
+- [Python 3.12+](https://www.python.org)
+- [xorriso](https://www.gnu.org/software/xorriso)
+- [Squashfs Tools](https://github.com/plougher/squashfs-tools)
+- [GnuPG](https://www.gnupg.org) (only for the legacy `keyring` flow)
 
+On Ubuntu:
+
+```sh
+sudo apt-get install xorriso squashfs-tools
+```
 
 ## Usage
 
+Create a directory with a `config.yml` and place the base Ubuntu iso next
+to it (see [example](example)):
+
+```yaml
+name: Forkbuntu
+version: '24.04'
+paths:
+  iso: ubuntu-24.04-live-server-amd64.iso
+  output: forkbuntu.iso
+autoinstall:
+  packages:
+    - cowsay
+```
+
+Then build the iso:
+
 ```sh
-git clone https://github.com/codejamninja/forkbuntu.git
 sudo forkbuntu -s example
 ```
 
+Building must run as root on a Linux host because the filesystem is
+configured inside a chroot and squashfs ownership must be preserved.
+Everything except the chroot bind mounts also works inside an unprivileged
+Ubuntu container (see `make test/e2e`).
+
+### Customization
+
+| path            | purpose                                                          |
+| --------------- | ---------------------------------------------------------------- |
+| `config.yml`    | build configuration                                               |
+| `filesystem/`   | files copied over the unpacked squashfs filesystem                |
+| `iso/`          | files copied over the iso tree                                    |
+| `scripts/`      | scripts shipped on the iso; `filesystem.sh` runs in the chroot    |
+| `extras/`       | extra `.deb` packages published on the iso as an apt component    |
+| `initrd/`       | files merged into the initrd (legacy `initrd.gz` isos only)       |
+
+### Configuration
+
+| key                   | default                | purpose                                                     |
+| --------------------- | ---------------------- | ------------------------------------------------------------ |
+| `name`                | from the base iso      | distribution name                                            |
+| `version`             | from the base iso      | distribution version                                         |
+| `description`         | `<name> <version>`     | branding used in `.disk/info`, `lsb-release`, boot menus     |
+| `hostname`            | derived from `name`    | preseeded hostname (legacy debian-installer only)            |
+| `paths.iso`           | —                      | base Ubuntu iso                                              |
+| `paths.output`        | `forkbuntu.iso`        | output iso path (relative to the invocation directory)       |
+| `squashfs`            | auto-detected          | squashfs image to remaster on multi-layer isos               |
+| `autoinstall`         | —                      | [subiquity autoinstall](https://canonical-subiquity.readthedocs-hosted.com/en/latest/reference/autoinstall-reference.html) config baked into the iso |
+| `preseed`             | auto (d-i isos only)   | preseed name, `true`/`false` to force                        |
+| `packages`            | `[]`                   | packages installed by the preseed (legacy debian-installer)  |
+| `apt`                 | all enabled            | `restricted`/`universe`/`multiarch` preseed toggles          |
+| `filesystem.compress` | `false`                | `true` for xz, or a number for the xz block size             |
+| `keyring`             | `false`                | rebuild the ubuntu-keyring with your gpg key (legacy d-i)    |
+
+For modern isos the `autoinstall` mapping is written to
+`/autoinstall/user-data` on the iso (as cloud-init `#cloud-config`) and the
+GRUB kernel command line is updated to
+`autoinstall ds=nocloud\;s=/cdrom/autoinstall/` automatically.
+
+## Development
+
+```sh
+make prepare   # one-time toolchain setup (asdf + uv sync)
+make test      # unit tests with coverage
+make lint      # black + basedpyright + shfmt
+make format    # auto-format
+make test/e2e  # full pipeline against a fixture iso in an ubuntu:24.04 container
+```
 
 ## Support
 
-Submit an [issue](https://github.com/codejamninja/forkbuntu/issues/new)
-
+Submit an [issue](https://gitlab.com/bitspur/misc/forkbuntu/-/issues/new)
 
 ## Contributing
 
-Review the [guidelines for contributing](https://github.com/codejamninja/forkbuntu/blob/master/CONTRIBUTING.md)
-
+Review the [guidelines for contributing](CONTRIBUTING.md)
 
 ## License
 
-[MIT License](https://github.com/codejamninja/forkbuntu/blob/master/LICENSE)
+[MIT License](LICENSE)
 
-[Jam Risser](https://codejam.ninja) © 2018
-
+[Clay Risser](https://clayrisser.com) © 2018
 
 ## Changelog
 
-Review the [changelog](https://github.com/codejamninja/forkbuntu/blob/master/CHANGELOG.md)
-
+Review the [changelog](CHANGELOG.md)
 
 ## Credits
 
-* [Jam Risser](https://codejam.ninja) - Author
-* [Debian Installer Preseed](https://people.debian.org/~plessy/DebianInstallerDebconfTemplates.html)
-* [Ubiquity Automation](https://wiki.ubuntu.com/UbiquityAutomation)
-* [Ubuntu Derivative Distro How to](https://wiki.ubuntu.com/DerivativeDistroHowto)
-* [Ubuntu Install CD Customization](https://help.ubuntu.com/community/InstallCDCustomization)
-* [Ubuntu Live CD Customization](https://help.ubuntu.com/community/LiveCDCustomization)
-
-
-## Support on Liberapay
-
-A ridiculous amount of coffee ☕ ☕ ☕ was consumed in the process of building this project.
-
-[Add some fuel](https://liberapay.com/codejamninja/donate) if you'd like to keep me going!
-
-[![Liberapay receiving](https://img.shields.io/liberapay/receives/codejamninja.svg?style=flat-square)](https://liberapay.com/codejamninja/donate)
-[![Liberapay patrons](https://img.shields.io/liberapay/patrons/codejamninja.svg?style=flat-square)](https://liberapay.com/codejamninja/donate)
+- [Clay Risser](https://clayrisser.com) - Author
+- [Ubuntu Autoinstall Reference](https://canonical-subiquity.readthedocs-hosted.com/en/latest/reference/autoinstall-reference.html)
+- [Debian Installer Preseed](https://people.debian.org/~plessy/DebianInstallerDebconfTemplates.html)
+- [Ubuntu Derivative Distro How to](https://wiki.ubuntu.com/DerivativeDistroHowto)
+- [Ubuntu Install CD Customization](https://help.ubuntu.com/community/InstallCDCustomization)
+- [Ubuntu Live CD Customization](https://help.ubuntu.com/community/LiveCDCustomization)
